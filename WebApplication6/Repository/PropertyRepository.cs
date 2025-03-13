@@ -16,7 +16,10 @@ namespace WebApplication6.Repository
         {
             _context.Properties.Add(property);
             _context.SaveChanges();
+            _context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2", property.Owner_Id, property.Owner_Id, "you have inserted a new property");
+
             return true;
+
         }
 
         public bool DeleteProp(Property property)
@@ -26,6 +29,9 @@ namespace WebApplication6.Repository
             {
                 _context.Properties.Remove(existingProperty);
                 _context.SaveChanges();
+                string notipd = $"you have deletd a the property {property.Property_Id}: {property.Address}";
+                _context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2", property.Owner_Id, property.Owner_Id, notipd);
+
                 return true;
             }
             return false;
@@ -44,6 +50,9 @@ namespace WebApplication6.Repository
         public void Update(Property property)
         {
             _context.Entry(property).State = EntityState.Modified;
+            string notipd = $"you have made changes to {property.Property_Id}id at {property.Address}";
+            _context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2", property.Owner_Id, property.Owner_Id, notipd);
+
         }
 
         public async Task SaveChangesAsync()

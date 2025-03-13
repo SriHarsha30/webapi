@@ -5,6 +5,7 @@ using WebApplication6.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 
 namespace testing_Web_Api.Services
 {
@@ -29,27 +30,30 @@ namespace testing_Web_Api.Services
             _context = context;
         }
 
-        public async Task<(string leaseId, string ownerId)?> CreateLeaseAsync(string tenantId, int propertyId, DateTime startDate, DateTime endDate, string tenantSignature)
+
+        public (string leaseId, string ownerId)? CreateLease(string tenantId, int propertyId, DateTime startDate, DateTime endDate, string tenantSignature)
         {
-            var existingLeases = await _leaseRepository.GetAllLeases();
-            var existingLease = existingLeases.FirstOrDefault(l => l.Property_Id == propertyId && l.Lease_status == true);
+            var existingLease = _leaseRepository.GetAllLeases()
+                .FirstOrDefault(l => l.Property_Id == propertyId && l.Lease_status == true);
             if (existingLease != null)
             {
                 return null;
             }
 
-            //var tenant = await _registrationRepository.readData();
-            var tenant = _registrationRepository.readData().FirstOrDefault(i=> i.ID == tenantId);
+
+            var tenant = _registrationRepository.readData().FirstOrDefault(i => i.ID == tenantId);
             if (tenant?.Signature != tenantSignature)
             {
                 return null;
             }
+
 
             var property = _propRepository.ViewData().FirstOrDefault(i => i.Property_Id == propertyId);
             if (property == null)
             {
                 throw new KeyNotFoundException("Property not found.");
             }
+
 
             var lease = new Lease
             {
@@ -62,47 +66,23 @@ namespace testing_Web_Api.Services
                 Lease_status = false
             };
 
-            await _leaseRepository.AddLeaseAsync(lease);
-            await _context.Database.ExecuteSqlRawAsync("EXEC InsertIntoNotification1 @p0, @p1, @p2",
-                                             tenantId, property.Owner_Id, "tenant signed successfully");
+            _leaseRepository.AddLease(lease);
+            _context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2", tenantId, property.Owner_Id, "tenant signed successfully");
 
             return (lease.LeaseId.ToString(), property.Owner_Id);
         }
 
-        //public async Task<bool> FinalizeLeaseAsync(int leaseId, string ownerId, string ownerSignature)
-        //{
-        //    var lease = await _leaseRepository.GetLeaseByIdAsync(leaseId);
-        //    if (lease == null)
-        //    {
-        //        throw new KeyNotFoundException("Lease not found.");
-        //    }
-
-        //    var owner = _registrationRepository.readData().FirstOrDefault(i => i.ID == ownerId);
-        //    if (owner?.Signature != ownerSignature)
-        //    {
-        //        return false;
-        //    }
-
-        //    lease.Owner_Signature = true;
-        //    lease.Lease_status = true;
-
-        //    await _leaseRepository.UpdateLeaseAsync(lease);
-        //    await _context.Database.ExecuteSqlRawAsync("EXEC InsertIntoNotification1 @p0, @p1, @p2",
-        //                                      ownerId, lease.ID, "owner signed successfully");
-        //    return true;
-        //}
-
         public bool FinalizeLease(int leaseId, string ownerId, string ownerSignature)
         {
-            var l = _leaseRepository.GetAllLeasesAsync();
-            var lease = l
+
+            var lease = _leaseRepository.GetLeaseById(leaseId);
             if (lease == null)
             {
                 throw new KeyNotFoundException("Lease not found.");
             }
 
 
-            var owner = _registrationRepository.GetById(ownerId);
+            var owner = _registrationRepository.readData().FirstOrDefault(i => i.ID == ownerId);
             if (owner?.Signature != ownerSignature)
             {
                 return false;
@@ -113,28 +93,31 @@ namespace testing_Web_Api.Services
             lease.Lease_status = true;
 
             _leaseRepository.UpdateLease(lease);
-            _context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2",
-                                              ownerId, lease.ID, "owner signed successfully");
+            _context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2", ownerId, lease.ID, "owner signed successfully");
             return true;
+
         }
 
 
-        public async Task<IEnumerable<Lease>> GetLeasesByOwnerAsync(string ownerId)
+        public IEnumerable<Lease> GetLeasesByOwner(string ownerId)
         {
-            var properties = await _propRepository.GetPropertiesByOwnerAsync(ownerId);
-            if (!properties.Any())
+            var properties = _context.Properties
+                .FromSqlRaw("EXEC GetPropertiesByOwner @OwnerId", new SqlParameter("@OwnerId", ownerId))
+                .ToList();
+
+            if (properties == null || !properties.Any())
             {
                 return Enumerable.Empty<Lease>();
             }
-
             var propertyIds = properties.Select(p => p.Property_Id).ToList();
-            var leases = await _leaseRepository.GetAllLeasesAsync();
-            return leases.Where(l => propertyIds.Contains((int)l.Property_Id)).ToList();
+
+            return _leaseRepository.GetAllLeases().Where(l => propertyIds.Contains((int)l.Property_Id)).ToList();
         }
 
-        public async Task<Lease> GetLeaseByIdAsync(int leaseId)
+
+        public Lease GetLeaseById(int leaseId)
         {
-            var lease = await _leaseRepository.GetLeaseByIdAsync(leaseId);
+            var lease = _leaseRepository.GetLeaseById(leaseId);
             if (lease == null)
             {
                 throw new KeyNotFoundException($"Lease with ID {leaseId} not found.");
@@ -142,9 +125,9 @@ namespace testing_Web_Api.Services
             return lease;
         }
 
-        public async Task<IEnumerable<Lease>> GetAllLeasesAsync()
+        public IEnumerable<Lease> GetAllLeases()
         {
-            return await _leaseRepository.GetAllLeasesAsync();
+            return _leaseRepository.GetAllLeases();
         }
     }
 }

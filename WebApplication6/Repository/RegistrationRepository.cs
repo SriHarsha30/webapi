@@ -50,6 +50,8 @@ namespace WebApplication6.Repository
 
             _context.Add(a);
             _context.SaveChanges();
+            _context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2", a.ID, a.ID, "registered as a new user");
+
             return true;
         }
 

@@ -6,10 +6,10 @@ namespace WebApplication6.Services
 {
     public interface ILeaseService
     {
-        Task<(string leaseId, string ownerId)?> CreateLeaseAsync(string tenantId, int propertyId, DateTime startDate, DateTime endDate, string tenantSignature);
-        Task<bool> FinalizeLeaseAsync(int leaseId, string ownerId, string ownerSignature);
-        Task<IEnumerable<Lease>> GetLeasesByOwnerAsync(string ownerId);
-        Task<Lease> GetLeaseByIdAsync(int leaseId);
-        Task<IEnumerable<Lease>> GetAllLeasesAsync();
+        (string leaseId, string ownerId)? CreateLease(string tenantId, int propertyId, DateTime startDate, DateTime endDate, string tenantSignature);
+        bool FinalizeLease(int leaseId, string ownerId, string ownerSignature);
+        IEnumerable<Lease> GetLeasesByOwner(string ownerId);
+        Lease GetLeaseById(int leaseId);
+        IEnumerable<Lease> GetAllLeases();
     }
 }

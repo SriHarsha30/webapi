@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -15,15 +16,19 @@ namespace WebApplication6.Controllers
     {
         private readonly IRegistrationRepository _registrationRepository;
         private readonly Context _context;
+        private readonly IAuth _jwtAuth;
 
-        public RegistrationsController(IRegistrationRepository registrationRepository, Context context)
+
+        public RegistrationsController(IRegistrationRepository registrationRepository, Context context,IAuth jwtAuth)
         {
             _registrationRepository = registrationRepository;
             _context = context;
+            _jwtAuth = jwtAuth;
         }
 
         // GET: api/Registrations
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<Registration>>> GetRegistrationss()
         {
             return await Task.FromResult(_registrationRepository.readData());
@@ -31,6 +36,7 @@ namespace WebApplication6.Controllers
 
         // GET: api/Registrations/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<Registration>> GetRegistration(string id)
         {
             var registration = _registrationRepository.readData().FirstOrDefault(r => r.ID == id);
@@ -45,6 +51,7 @@ namespace WebApplication6.Controllers
 
         // PUT: api/Registrations/5
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutRegistration(string id, Registration registration)
         {
             if (id != registration.ID)
@@ -55,6 +62,8 @@ namespace WebApplication6.Controllers
             try
             {
                 _registrationRepository.Insertion(registration);
+                _context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2", registration.ID, registration.ID, "made a change to the registration");
+
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -73,6 +82,7 @@ namespace WebApplication6.Controllers
 
         // POST: api/Registrations
         [HttpPost]
+        //[Authorize]
         public async Task<ActionResult<Registration>> PostRegistration(Registration registration)
         {
             if (registration == null)
@@ -132,20 +142,33 @@ namespace WebApplication6.Controllers
             return CreatedAtAction("GetRegistration", new { id = registration.ID }, registration);
         }
 
-        // DELETE: api/Registrations/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRegistration(string id)
+        //// DELETE: api/Registrations/5
+        //[HttpDelete("{id}")]
+        //[Authorize]
+        //public async Task<IActionResult> DeleteRegistration(string id)
+        //{
+        //    var registration = _registrationRepository.readData().FirstOrDefault(r => r.ID == id);
+        //    if (registration == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    _registrationRepository.readData().Remove(registration);
+        //    await _registrationRepository.SaveChangesAsync();
+
+        //    return NoContent();
+        //}
+
+
+        [AllowAnonymous]
+        // POST api/<UsersController>/authentication
+        [HttpPost("authentication")]
+        public IActionResult Authentication([FromBody] Registration user)
         {
-            var registration = _registrationRepository.readData().FirstOrDefault(r => r.ID == id);
-            if (registration == null)
-            {
-                return NotFound();
-            }
-
-            _registrationRepository.readData().Remove(registration);
-            await _registrationRepository.SaveChangesAsync();
-
-            return NoContent();
+            var token = _jwtAuth.Authentication(user.ID, user.Password);
+            if (token == null)
+                return Unauthorized();
+            return Ok(new { Token = token });
         }
     }
 }
