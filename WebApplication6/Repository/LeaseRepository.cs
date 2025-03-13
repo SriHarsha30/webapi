@@ -15,26 +15,26 @@ namespace WebApplication6.Repository
             _context = context;
         }
 
-        public async Task<IEnumerable<Lease>> GetAllLeasesAsync()
+        public IEnumerable<Lease> GetAllLeases()
         {
-            return await _context.Leases1.ToListAsync();
+            return _context.Leases1.ToList();
         }
 
-        public async Task<Lease> GetLeaseByIdAsync(int leaseId)
+        public Lease GetLeaseById(int leaseId)
         {
-            return await _context.Leases1.FirstOrDefaultAsync(l => l.LeaseId == leaseId);
+            return _context.Leases1.FirstOrDefault(l => l.LeaseId == leaseId);
         }
 
-        public async Task AddLeaseAsync(Lease lease)
+        public void AddLease(Lease lease)
         {
-            await _context.Leases1.AddAsync(lease);
-            await _context.SaveChangesAsync();
+            _context.Leases1.Add(lease);
+            _context.SaveChanges();
         }
 
-        public async Task UpdateLeaseAsync(Lease lease)
+        public void UpdateLease(Lease lease)
         {
             _context.Leases1.Update(lease);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
     }
 }
