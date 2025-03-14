@@ -12,6 +12,7 @@ namespace WebApplication6.Controllers
 {
     [Route("api/[controller]")]
     [ApiController()]
+    
     public class RegistrationsController : ControllerBase
     {
         private readonly IRegistrationRepository _registrationRepository;

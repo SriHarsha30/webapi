@@ -13,6 +13,7 @@ namespace WebApplication6.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+  
     public class LeaseController : ControllerBase
     {
         private readonly ILeaseService _leaseService;

@@ -12,6 +12,7 @@ namespace WebApplication5.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+  
     public class PropertiesController : ControllerBase
     {
         private readonly IProperty _repository;
@@ -132,9 +133,6 @@ namespace WebApplication5.Controllers
             return NoContent();
         }
 
-        private bool PropertyExists(int id)
-        {
-            return _repository.Exists(id);
-        }
+       
     }
 }

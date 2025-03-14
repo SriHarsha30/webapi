@@ -12,7 +12,6 @@ using WebApplication6.Services;
 namespace WebApplication6.Controllers
 {
     [Route("api/[controller]")]
-
     [ApiController]
 
     public class MaintainancesController : ControllerBase

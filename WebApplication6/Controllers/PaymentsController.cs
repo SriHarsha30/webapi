@@ -14,6 +14,7 @@ namespace WebApplication6.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+   
     public class PaymentsController : ControllerBase
     {
         private readonly Context _context;
