@@ -11,7 +11,7 @@ using WebApplication6.Repository;
 namespace WebApplication6.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
+    [ApiController()]
     public class RegistrationsController : ControllerBase
     {
         private readonly IRegistrationRepository _registrationRepository;
@@ -28,7 +28,7 @@ namespace WebApplication6.Controllers
 
         // GET: api/Registrations
         [HttpGet]
-        [Authorize]
+        [Authorize(Roles ="o")]
         public async Task<ActionResult<IEnumerable<Registration>>> GetRegistrationss()
         {
             return await Task.FromResult(_registrationRepository.readData());
@@ -36,7 +36,7 @@ namespace WebApplication6.Controllers
 
         // GET: api/Registrations/5
         [HttpGet("{id}")]
-        [Authorize]
+        [Authorize(Roles = "o")]
         public async Task<ActionResult<Registration>> GetRegistration(string id)
         {
             var registration = _registrationRepository.readData().FirstOrDefault(r => r.ID == id);
@@ -51,7 +51,7 @@ namespace WebApplication6.Controllers
 
         // PUT: api/Registrations/5
         [HttpPut("{id}")]
-        [Authorize]
+        [Authorize(Roles = "o")]
         public async Task<IActionResult> PutRegistration(string id, Registration registration)
         {
             if (id != registration.ID)
@@ -81,8 +81,9 @@ namespace WebApplication6.Controllers
         }
 
         // POST: api/Registrations
+        [AllowAnonymous]
         [HttpPost]
-        //[Authorize]
+        
         public async Task<ActionResult<Registration>> PostRegistration(Registration registration)
         {
             if (registration == null)

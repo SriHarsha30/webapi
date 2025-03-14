@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,7 @@ namespace WebApplication6.Controllers
 
         // POST: api/lease/tenant
         [HttpPost("applytenant")]
+        [Authorize(Roles = "t")]
         public ActionResult CreateLease([FromBody] LeaseRequest leaseRequest)
         {
             try
@@ -64,6 +66,7 @@ namespace WebApplication6.Controllers
 
         // POST: api/lease/owner
         [HttpPost("ownerval")]
+        [Authorize(Roles = "o")]
         public ActionResult FinalizeLease([FromBody] OwnerSignatureRequest ownerRequest)
         {
             try
@@ -103,6 +106,7 @@ namespace WebApplication6.Controllers
 
         // GET: api/lease/{id}
         [HttpGet("GetLeaseByLId/{id}")]
+        [Authorize(Roles = "o,t")]
         public ActionResult<Lease> GetLeaseById(int id)
         {
             try
@@ -127,6 +131,7 @@ namespace WebApplication6.Controllers
         // GET: api/lease/owner/{ownerId}
 
         [HttpGet("ownersleases/{ownerId}")]
+        [Authorize(Roles = "o,t")]
         public ActionResult<IEnumerable<Lease>> GetLeasesByOwner(string ownerId)
         {
             try
@@ -150,6 +155,7 @@ namespace WebApplication6.Controllers
 
         // GET: api/lease
         [HttpGet]
+        [Authorize(Roles = "o,t")]
         public ActionResult<IEnumerable<Lease>> GetAllLeases()
         {
             try

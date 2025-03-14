@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -26,6 +27,7 @@ namespace WebApplication6.Controllers
 
         // GET: api/Payments
         [HttpGet]
+        [Authorize(Roles = "o,t")]
         public async Task<ActionResult<IEnumerable<Payment>>> GetPayments()
         {
             return await _context.Payments.ToListAsync();
@@ -33,6 +35,7 @@ namespace WebApplication6.Controllers
 
         // GET: api/Payments/5
         [HttpGet("{id}")]
+        [Authorize(Roles = "o,t")]
         public async Task<ActionResult<Payment>> GetPayment(int id)
         {
             var payment = await _context.Payments.FindAsync(id);
@@ -46,6 +49,7 @@ namespace WebApplication6.Controllers
         }
 
         [HttpGet("GetPaymentsByTenant/{tenantId}")]
+        [Authorize(Roles = "t")]
         public async Task<IActionResult> GetPaymentsByTenant(string tenantId)
         {
             var payments = await _paymentRepository.GetPaymentsByTenantIdAsync(tenantId);
@@ -59,6 +63,7 @@ namespace WebApplication6.Controllers
         }
 
         [HttpGet("GetPaymentsByOwnerid/{oid}")]
+        [Authorize(Roles = "o")]
         public async Task<IActionResult> GetPaymentsByOwnerid(string oid)
         {
 
@@ -74,6 +79,7 @@ namespace WebApplication6.Controllers
 
         // PUT: api/Payments/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "o")]
         public async Task<IActionResult> PutPayment(int id, [FromBody] string ownerStatus)
         {
             var payment = await _context.Payments.FindAsync(id);
@@ -113,6 +119,7 @@ namespace WebApplication6.Controllers
 
         // POST: api/Payments
         [HttpPost]
+        [Authorize(Roles = "t")]
         public async Task<ActionResult<Payment>> PostPayment(Payment payment)
         {
             if (payment == null)
@@ -192,6 +199,7 @@ namespace WebApplication6.Controllers
 
         // DELETE: api/Payments/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "a")]
         public async Task<IActionResult> DeletePayment(int id)
         {
             var payment = await _context.Payments.FindAsync(id);
@@ -205,6 +213,7 @@ namespace WebApplication6.Controllers
 
             return NoContent();
         }
+
 
         private bool PaymentExists(int id)
         {

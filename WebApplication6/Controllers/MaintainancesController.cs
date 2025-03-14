@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -29,7 +30,7 @@ namespace WebApplication6.Controllers
         }
 
         [HttpGet("owner/{userId}")]
-
+        [Authorize(Roles = "o")]
         public ActionResult<List<Maintainance>> ViewOwnerRequests(string userId)
 
         {
@@ -49,7 +50,7 @@ namespace WebApplication6.Controllers
         }
 
         [HttpGet("tenant/{userId}")]
-
+        [Authorize(Roles = "t")]
         public ActionResult<List<Maintainance>> ViewTenantRequests(string userId)
 
         {
@@ -69,7 +70,7 @@ namespace WebApplication6.Controllers
         }
 
         [HttpPost]
-
+        [Authorize(Roles = "t")]
         public ActionResult InsertMaintainance([FromBody] Maintainance maintainance)
 
         {
@@ -111,7 +112,7 @@ namespace WebApplication6.Controllers
         }
 
         [HttpPut("{requestId}")]
-
+        [Authorize(Roles = "o")]
         public ActionResult UpdateStatus(int requestId, [FromBody] string newStatus)
 
         {

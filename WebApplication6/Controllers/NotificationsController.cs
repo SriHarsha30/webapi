@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +32,7 @@ namespace WebApplication6.Controllers
         // GET: api/Notifications
 
         [HttpGet]
-
+        [Authorize(Roles = "o,t")]
         public ActionResult<IEnumerable<Notification>> GetAllNotifications()
 
         {
@@ -53,6 +54,7 @@ namespace WebApplication6.Controllers
         // GET: api/Notifications/{id}
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "o,t")]
 
         public ActionResult<Notification> GetNotificationById(int id)
 
@@ -81,7 +83,7 @@ namespace WebApplication6.Controllers
         // GET: api/Notifications/ByUID/{senderId}
 
         [HttpGet("ByUID/{senderId}")]
-
+        [Authorize(Roles = "o,t")]
         public ActionResult<IEnumerable<Notification>> GetNotificationsBySender(string senderId)
 
         {
@@ -117,7 +119,7 @@ namespace WebApplication6.Controllers
         // POST: api/Notifications
 
         [HttpPost]
-
+        [Authorize(Roles = "o,t")]
         public ActionResult<Notification> PostNotification(Notification notification)
 
         {
@@ -165,7 +167,7 @@ namespace WebApplication6.Controllers
         // PUT: api/Notifications/{id}
 
         [HttpPut("{id}")]
-
+        [Authorize(Roles = "o,t")]
         public IActionResult PutNotification(int id, Notification notification)
 
         {
@@ -201,7 +203,7 @@ namespace WebApplication6.Controllers
         // DELETE: api/Notifications/{id}
 
         [HttpDelete("{id}")]
-
+        [Authorize(Roles = "o,t")]
         public IActionResult DeleteNotification(int id)
 
         {
