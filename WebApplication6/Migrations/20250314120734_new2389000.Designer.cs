@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication6.Models;
 
@@ -11,9 +12,11 @@ using WebApplication6.Models;
 namespace WebApplication6.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20250314120734_new2389000")]
+    partial class new2389000
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -182,8 +185,8 @@ namespace WebApplication6.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("PriceOfTheProperty")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<double>("PriceOfTheProperty")
+                        .HasColumnType("float");
 
                     b.HasKey("Property_Id");
 
