@@ -141,6 +141,7 @@ BEGIN
 		p.Address,
 		p.Description,
 		p.AvailableStatus,
+	p.PriceOfTheProperty,
         r.ID,
         r.Signature
     FROM Properties p
@@ -240,12 +241,97 @@ BEGIN
     WHERE ID = @Id
 END
 ----------------------------------------------------------------------------
+CREATE PROCEDURE CheckLeaseStatus
+    @Tenant_Id nvarchar(25),
+    @PropertyId INT,
+    @IsLeaseConfirmed BIT OUTPUT
+AS
+BEGIN
+    -- Check if the lease is confirmed by the owner
+    SELECT @IsLeaseConfirmed = CASE WHEN L.Owner_Signature = 'true'  THEN 1 ELSE 0 END
+    FROM Leases1 AS L
+    WHERE L.Property_Id = @PropertyId AND L.ID = @Tenant_Id;
+END;
+
+
+------------------------------------------------------------------------------
+CREATE PROCEDURE GetTenantHistory
+    @Tenant_id NVARCHAR(50)
+AS
+BEGIN
+    SELECT 
+        leased_property_id,
+        startTime,
+        endTime
+    FROM 
+        History
+    WHERE 
+        Tenant_id = @Tenant_id;
+END
+------------------------------------------------------------------------------------
+CREATE PROCEDURE GetTenantHistoryForOwner
+    @Tenant_id NVARCHAR(50)
+AS
+BEGIN
+    SELECT 
+        h.Tenant_name,
+        h.Tenant_Phonenumber,
+        h.leased_property_id,
+        h.startTime,
+        h.endTime
+    FROM 
+        History h
+         WHERE 
+         h.Tenant_id = @Tenant_id;
+end
+--------------------------------------------------------------------------------------
+CREATE PROCEDURE InsertHistoryFromLeaseTable
+AS
+BEGIN
+    INSERT INTO History (Tenant_id, Tenant_name, Tenant_Phonenumber, leased_property_id, startTime, endTime)
+    SELECT 
+        l.ID,
+        r.Name,
+        r.PhoneNumber,
+       l.Property_Id,
+        l.StartDate,
+        l.EndDate
+    FROM 
+        Leases1 l
+    INNER JOIN 
+        Registrationss r ON l.ID = r.ID
+
+    WHERE 
+        l.Lease_status = 1;
+END
+--------------------------------------------------------------------------------------------
+CREATE TRIGGER InsertHistoryOnLeaseUpdate
+ON Leases1
+AFTER UPDATE
+AS
+BEGIN
+    INSERT INTO Histories (Tenant_id, Tenant_name, Tenant_Phonenumber, leased_property_id, startTime, endTime)
+    SELECT 
+        inserted.ID,
+        r.Name,
+        r.PhoneNumber,
+        inserted.Property_Id,
+        inserted.StartDate,
+        inserted.EndDate
+    FROM 
+        inserted
+    INNER JOIN 
+        Registrationss r ON inserted.ID = r.ID
+    WHERE 
+        inserted.Lease_status = 1;
+ENDs
+--------------------------------------------------------------------------------------------------
 CREATE PROCEDURE GetOwnerStatusByLeaseId
     @LeaseId INT
 AS
 BEGIN
     SET NOCOUNT ON;
-
+ 
     SELECT 
         p.Ownerstatus
     FROM 
@@ -255,4 +341,3 @@ BEGIN
     WHERE 
         l.LeaseId = @LeaseId;
 END;
------------------------------------------------------------
