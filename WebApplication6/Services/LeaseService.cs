@@ -106,6 +106,13 @@ namespace testing_Web_Api.Services
 
             _leaseRepository.UpdateLease(lease);
             _context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2", ownerId, lease.ID, "owner signed successfully and the lease gets updated when the payment gets finallised");
+
+            var property = _propRepository.ViewData().FirstOrDefault(i => i.Owner_Id == ownerId);
+            if (property != null)
+            {
+                property.AvailableStatus = false;
+                _propRepository.Update(property);
+            }
             return true;
 
         }
