@@ -15,7 +15,7 @@ namespace WebApplication6.Models
         [Required]
         public string Description { get; set; }
         [Required]
-        public double PriceOfTheProperty { get; set; }
+        public decimal PriceOfTheProperty { get; set; }
         [Required]
         public bool AvailableStatus { get; set; }
 

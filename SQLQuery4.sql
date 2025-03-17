@@ -1,4 +1,4 @@
-CREATE PROCEDURE CheckPropertyAndFetchOwner
+﻿CREATE PROCEDURE CheckPropertyAndFetchOwner
     @PropertyId INT
 AS
 BEGIN
@@ -29,6 +29,7 @@ BEGIN
         RAISERROR('Tenant does not exist.', 16, 1);
         RETURN;
     END
+
  
     -- Check if the Property_Id exists in the Props table
     IF NOT EXISTS (SELECT 1 FROM Properties WHERE Property_Id = @Property_Id)
@@ -240,19 +241,3 @@ BEGIN
     WHERE ID = @Id
 END
 ----------------------------------------------------------------------------
-CREATE PROCEDURE GetOwnerStatusByLeaseId
-    @LeaseId INT
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT 
-        p.Ownerstatus
-    FROM 
-        Payments p
-    INNER JOIN 
-        Leases1 l ON l.ID = p.Tenant_Id
-    WHERE 
-        l.LeaseId = @LeaseId;
-END;
------------------------------------------------------------

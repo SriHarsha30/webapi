@@ -15,18 +15,21 @@ namespace testing_Web_Api.Services
         private readonly IRegistrationRepository _registrationRepository;
         private readonly IProperty _propRepository;
         private readonly INotificationService _notificationService;
+        private readonly IPaymentRepository _paymentRepository;
         private readonly Context _context;
 
         public LeaseService(ILeaseRepository leaseRepository,
                             IRegistrationRepository registrationRepository,
                             IProperty propRepository,
                             INotificationService notificationService,
+                            IPaymentRepository paymentRepository,
                             Context context)
         {
             _leaseRepository = leaseRepository;
             _registrationRepository = registrationRepository;
             _propRepository = propRepository;
             _notificationService = notificationService;
+            _paymentRepository = paymentRepository;
             _context = context;
         }
 
@@ -90,10 +93,26 @@ namespace testing_Web_Api.Services
 
 
             lease.Owner_Signature = true;
-            lease.Lease_status = true;
+    //        string ownerStatus = _context.Database.ExecuteSqlRaw(
+    //    "EXEC GetOwnerStatusByLeaseId @p0", leaseId
+    //).ToString();
+            
+    //        if (ownerStatus != "true")
+    //        {
+    //            return false; 
+    //        }
+
+            lease.Lease_status = false;
 
             _leaseRepository.UpdateLease(lease);
-            _context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2", ownerId, lease.ID, "owner signed successfully");
+            _context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2", ownerId, lease.ID, "owner signed successfully and the lease gets updated when the payment gets finallised");
+
+            var property = _propRepository.ViewData().FirstOrDefault(i => i.Owner_Id == ownerId);
+            if (property != null)
+            {
+                property.AvailableStatus = false;
+                _propRepository.Update(property);
+            }
             return true;
 
         }

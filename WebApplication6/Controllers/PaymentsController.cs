@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,9 @@ namespace WebApplication6.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-   
+    [Authorize]
+
+
     public class PaymentsController : ControllerBase
     {
         private readonly Context _context;
@@ -118,9 +121,9 @@ namespace WebApplication6.Controllers
             return NoContent();
         }
 
-        // POST: api/Payments
-        [HttpPost]
-        [Authorize(Roles = "t")]
+        //POST: api/Payments
+       [HttpPost]
+       [Authorize(Roles = "t")]
         public async Task<ActionResult<Payment>> PostPayment(Payment payment)
         {
             if (payment == null)
@@ -129,13 +132,40 @@ namespace WebApplication6.Controllers
             }
 
             // Check if Tenant_Id and PropertyId exist
+            bool tenantAndPropertyExist = await CheckTenantAndPropertyAsync(payment.Tenant_Id, payment.PropertyId);
+            if (!tenantAndPropertyExist)
+            {
+                return BadRequest(new { message = "Tenant or Property does not exist." });
+            }
+            // Check if Tenant_Id and PropertyId exist and if the lease is confirmed
+            bool isLeaseConfirmed = false;
             try
             {
-                var checkResult = await CheckTenantAndPropertyAsync(payment.Tenant_Id, payment.PropertyId);
+                var isLeaseConfirmedParam = new SqlParameter("@IsLeaseConfirmed", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+                await _context.Database.ExecuteSqlRawAsync("EXEC CheckLeaseStatus @Tenant_Id, @PropertyId, @IsLeaseConfirmed OUTPUT",
+                    new SqlParameter("@Tenant_Id", payment.Tenant_Id),
+                    new SqlParameter("@PropertyId", payment.PropertyId),
+                    isLeaseConfirmedParam);
+
+                isLeaseConfirmed = (bool)isLeaseConfirmedParam.Value;
+
             }
             catch (Exception ex)
             {
                 return NotFound(new { message = ex.Message });
+            }
+
+
+            if (!isLeaseConfirmed)
+            {
+                return BadRequest(new { message = "Lease is not yet confirmed." });
+            }
+
+            // Fetch the amount from the property
+            var property = await _context.Properties.FindAsync(payment.PropertyId);
+            if (property == null)
+            {
+                return NotFound(new { message = "Property not found." });
             }
 
             // Create a new Payment object to ensure the constructor is called
@@ -143,7 +173,7 @@ namespace WebApplication6.Controllers
             {
                 Tenant_Id = payment.Tenant_Id,
                 PropertyId = payment.PropertyId,
-                Amount = payment.Amount,
+                Amount = property.PriceOfTheProperty, // Fetch the amount from the property
                 Status = payment.Status,
                 Ownerstatus = "Active"
             };
@@ -164,12 +194,11 @@ namespace WebApplication6.Controllers
                     throw;
                 }
             }
-             
-            //string notipd = $"a payment was made with id:{payment.PaymentID} of amount :{payment.Amount} ";
-            //_context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2", newPayment.Tenant_Id,ownerid, notipd);
+
             return CreatedAtAction("GetPayment", new { id = newPayment.PaymentID }, newPayment);
 
         }
+
 
 
         private async Task<bool> CheckTenantAndPropertyAsync(string tenantId, int propertyId)
@@ -180,19 +209,19 @@ namespace WebApplication6.Controllers
 
             try
             {
-                var result = await _context.Database.ExecuteSqlRawAsync(commandText, tenantParam, propertyParam);
-                return result == 0; // If no error is raised, the procedure returns 0
+                await _context.Database.ExecuteSqlRawAsync(commandText, tenantParam, propertyParam);
+                return true; // If no error is raised, both tenant and property exist
             }
             catch (SqlException ex)
             {
                 // Handle specific error messages if needed
                 if (ex.Message.Contains("Tenant does not exist"))
                 {
-                    throw new Exception("Tenant does not exist.");
+                    return false;
                 }
                 else if (ex.Message.Contains("Property does not exist"))
                 {
-                    throw new Exception("Property does not exist.");
+                    return false;
                 }
                 throw;
             }
