@@ -240,3 +240,19 @@ BEGIN
     WHERE ID = @Id
 END
 ----------------------------------------------------------------------------
+CREATE PROCEDURE GetOwnerStatusByLeaseId
+    @LeaseId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        p.Ownerstatus
+    FROM 
+        Payments p
+    INNER JOIN 
+        Leases1 l ON l.ID = p.Tenant_Id
+    WHERE 
+        l.LeaseId = @LeaseId;
+END;
+-----------------------------------------------------------
