@@ -161,16 +161,21 @@ namespace WebApplication6.Controllers
         //    return NoContent();
         //}
 
-
         [AllowAnonymous]
         // POST api/<UsersController>/authentication
         [HttpPost("authentication")]
-        public IActionResult Authentication([FromBody] Registration user)
+        public IActionResult Authentication([FromBody] UserCredentials user)
         {
-            var token = _jwtAuth.Authentication(user.ID, user.Password);
+            var token = _jwtAuth.Authentication(user.Username, user.Password);
             if (token == null)
                 return Unauthorized();
             return Ok(new { Token = token });
+        }
+
+        public class UserCredentials
+        {
+            public string Username { get; set; }
+            public string Password { get; set; }
         }
     }
 }
