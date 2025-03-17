@@ -24,7 +24,10 @@ namespace WebApplication6.Models
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Lease>().ToTable(Tb => Tb.HasTrigger("InsertHistoryOnLeaseUpdate"));
+            modelBuilder.Entity<History>().HasNoKey();
         }
+
+       
 
 
 

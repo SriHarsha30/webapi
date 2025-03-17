@@ -93,16 +93,16 @@ namespace testing_Web_Api.Services
 
 
             lease.Owner_Signature = true;
-            string ownerStatus = _context.Database.ExecuteSqlRaw(
-        "EXEC GetOwnerStatusByLeaseId @p0", leaseId
-    ).ToString();
+    //        string ownerStatus = _context.Database.ExecuteSqlRaw(
+    //    "EXEC GetOwnerStatusByLeaseId @p0", leaseId
+    //).ToString();
             
-            if (ownerStatus != "true")
-            {
-                return false; 
-            }
+    //        if (ownerStatus != "true")
+    //        {
+    //            return false; 
+    //        }
 
-            lease.Lease_status = true;
+            lease.Lease_status = false;
 
             _leaseRepository.UpdateLease(lease);
             _context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2", ownerId, lease.ID, "owner signed successfully and the lease gets updated when the payment gets finallised");

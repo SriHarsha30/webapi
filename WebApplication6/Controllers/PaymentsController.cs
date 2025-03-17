@@ -98,7 +98,14 @@ namespace WebApplication6.Controllers
             if (ownerStatus.Equals("true", StringComparison.OrdinalIgnoreCase))
             {
                 payment.Status = "true";
+                var lease = await _context.Leases1.FirstOrDefaultAsync(l => l.Property_Id == payment.PropertyId);
+                if (lease != null)
+                {
+                    lease.Lease_status = true;
+                    _context.Entry(lease).State = EntityState.Modified;
+                }
             }
+            
 
             _context.Entry(payment).State = EntityState.Modified;
 
@@ -117,6 +124,7 @@ namespace WebApplication6.Controllers
                     throw;
                 }
             }
+
 
             return NoContent();
         }

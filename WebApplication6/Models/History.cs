@@ -6,7 +6,7 @@ namespace WebApplication6.Models
 {
     public class History
     {
-        [Key]
+        
         public string Tenant_id { get; set; }   
 
         [Required]
