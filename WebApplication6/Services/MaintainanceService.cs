@@ -21,120 +21,71 @@ namespace WebApplication6.Services
 
 
 
-        public void InsertMaintainance(int requestId, int propertyId, string tenantId, string description, string status, string imagePath)
-
+        public void InsertMaintainance(int propertyId, string tenantId, string description, String status, string imagePath)
         {
-
             try
-
             {
-
-                // Check if PropertyId exists
-
                 if (!_repository.PropertyExists(propertyId))
-
                 {
-
                     throw new Exception($"Property with ID {propertyId} does not exist.");
-
                 }
-
-                // Check if TenantId exists
 
                 if (!_repository.TenantExists(tenantId))
-
                 {
-
                     throw new Exception($"Tenant with ID {tenantId} does not exist.");
-
                 }
 
-                // Insert the maintenance request
-
-                _repository.InsertMaintainance(requestId, propertyId, tenantId, description, status, imagePath);
-                //_context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2", tenantId, ownerId, "a Maintainance request was made");
-
-
+                if (!_repository.LeaseSigned(propertyId))
+                {
+                    throw new Exception($"Property with ID {tenantId} has not been taken to lease.");
+                }
+                _repository.InsertMaintainance(propertyId, tenantId, description, status, imagePath);
             }
-
             catch (Exception ex)
-
             {
-
-                // Handle exception (log it, rethrow it, etc.)
-
-                throw new Exception("An error occurred while inserting the maintenance request.", ex);
-
+                // Log the exception details
+                // Example: _logger.LogError(ex, "Error in service layer while inserting maintenance");
+                throw new Exception("An (ser) error occurred while inserting the maintenance request.", ex);
             }
-
         }
 
-        public List<Maintainance> ViewTenantRequests(string userId)
-
+        public List<Maintainance> ViewTenantRequests(string tenantId)
         {
-
             try
-
             {
-
-                if (!_repository.TenantExists(userId))
-
+                if (!_repository.TenantExists(tenantId))
                 {
-
-                    throw new Exception($"Tenant with ID {userId} does not exist.");
-
+                    throw new Exception($"Tenant with ID {tenantId} does not exist.");
                 }
-
-                return _repository.ViewTenantRequests(userId);
-
+                return _repository.ViewTenantRequests(tenantId);
             }
-
             catch (Exception ex)
-
             {
-
-                // Handle exception (log it, rethrow it, etc.)
-
-                throw new Exception("An error occurred while viewing tenant requests.", ex);
-
+                // Log the exception details
+                // Example: _logger.LogError(ex, "Error in service layer while viewing tenant requests");
+                throw new Exception("An (ser) error occurred while viewing tenant requests.", ex);
             }
-
         }
 
         public List<Maintainance> ViewOwnerRequests(string userId)
-
         {
-
             try
-
             {
-
                 if (!_repository.TenantExists(userId))
-
                 {
-
                     throw new Exception($"Owner with ID {userId} does not exist.");
-
                 }
-
                 return _repository.ViewOwnerRequests(userId);
-
             }
-
             catch (Exception ex)
-
             {
-
-                // Handle exception (log it, rethrow it, etc.)
-
-                throw new Exception("An error occurred while viewing owner requests.", ex);
-
+                // Log the exception details
+                //_logger.LogError(ex, "Error in service layer while viewing owner requests");
+                throw new Exception("An (ser) error occurred while viewing owner requests.", ex);
             }
-
         }
 
         public bool UpdateStatus(int requestId, string newStatus)
-
         {
 
             try

@@ -36,19 +36,27 @@ namespace WebApplication6.Repository
             return user != null ? int.Parse(user.ID) : 0;
         }
 
-        void IMaintainanceRepository.InsertMaintainance(int requestId, int propertyId, string tenantId, string description, string status, string imagePath)
+        void IMaintainanceRepository.InsertMaintainance(int propertyId, string tenantId, string description, String status, string imagePath)
         {
-            var maintainance = new Maintainance
+            try
             {
-                RequestId = requestId,
-                PropertyId = propertyId,
-                TenantId = tenantId,
-                Description = description,
-                Status = status,
-                ImagePath = imagePath
-            };
-            _context.Maintainances.Add(maintainance);
-            _context.SaveChanges();
+                var maintainance = new Maintainance
+                {
+                    PropertyId = propertyId,
+                    TenantId = tenantId,
+                    Description = description,
+                    Status = "Pending",
+                    ImagePath = imagePath
+                };
+                _context.Maintainances.Add(maintainance);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details
+                // Example: _logger.LogError(ex, "Error inserting maintenance into database");
+                throw new Exception("An (repo) error occurred while inserting the maintenance request.", ex);
+            }
         }
 
         bool IMaintainanceRepository.UpdateStatus(int requestId, string newStatus)
@@ -56,29 +64,52 @@ namespace WebApplication6.Repository
             var maintainance = _context.Maintainances.FirstOrDefault(m => m.RequestId == requestId);
             if (maintainance != null)
             {
-                maintainance.Status = newStatus;
+                maintainance.Status = (newStatus); // Convert string to enum
                 _context.SaveChanges();
                 return true;
             }
             return false;
         }
 
-        List<Maintainance> IMaintainanceRepository.ViewOwnerRequests(string userId)
+        public List<Maintainance> ViewOwnerRequests(string userId)
         {
-            // Define the output parameter for the stored procedure
-            var ownerIdParam = new SqlParameter("@OwnerId", userId);
+            try
+            {
+                // Define the output parameter for the stored procedure
+                var ownerIdParam = new SqlParameter("@OwnerId", userId);
 
-            // Execute the stored procedure and retrieve the results
-            var maintainances = _context.Maintainances
-                .FromSqlRaw("EXEC sp_GetMaintainancesByOwnerId @OwnerId", ownerIdParam)
-                .ToList();
+                // Execute the stored procedure and retrieve the results
+                var maintainances = _context.Maintainances
+                    .FromSqlRaw("EXEC sp_GetMaintainancesByOwnerId @OwnerId", ownerIdParam)
+                    .ToList();
 
-            return maintainances;
+                return maintainances;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details
+                //_logger.LogError(ex, "Error retrieving owner requests from database");
+                throw new Exception("An (repo) error occurred while viewing owner requests.", ex);
+            }
         }
 
-        List<Maintainance> IMaintainanceRepository.ViewTenantRequests(string userId)
+        public List<Maintainance> ViewTenantRequests(string userId)
         {
-            return _context.Maintainances.Where(m => m.TenantId == userId).ToList();
+            try
+            {
+                // Assuming TenantId is stored as a string in the database
+                var tenantRequests = _context.Maintainances
+                    .Where(m => m.TenantId == userId)
+                    .ToList();
+
+                return tenantRequests;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details
+                // Example: _logger.LogError(ex, "Error retrieving tenant requests from database");
+                throw new Exception("An (repo) error occurred while viewing tenant requests.", ex);
+            }
         }
 
         public bool TenantExists(string tenantId)
@@ -93,6 +124,12 @@ namespace WebApplication6.Repository
             // Implement logic to check if the property exists in the database
             // For example:
             return _context.Properties.Any(p => p.Property_Id == propertyId);
+        }
+
+        public bool LeaseSigned(int propertyId)
+        {
+            // Implement logic to check if the lease status is true for the given property ID
+            return _context.Leases1.Any(l => l.Property_Id == propertyId && l.Lease_status == true);
         }
 
     }

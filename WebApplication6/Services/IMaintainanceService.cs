@@ -4,7 +4,7 @@ namespace WebApplication6.Services
 {
     public interface IMaintainanceService
     {
-        void InsertMaintainance(int requestId, int propertyId, string tenantId, string description, string status, string imagePath);
+        void InsertMaintainance( int propertyId, string tenantId, string description, String status, string imagePath);
 
         List<Maintainance> ViewTenantRequests(string userId);
 

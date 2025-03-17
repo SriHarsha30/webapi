@@ -5,10 +5,11 @@ namespace WebApplication6.Repository
     public interface IMaintainanceRepository
 
     {
+        bool LeaseSigned(int proportyId);
 
         int CheckUserId(string userId, out bool isPresent);
 
-        void InsertMaintainance(int requestId, int propertyId, string tenantId, string description, string status, string imagePath);
+        void InsertMaintainance(int propertyId, string tenantId, string description, String status, string imagePath);
 
         List<Maintainance> ViewTenantRequests(string userId);
 

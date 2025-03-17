@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApplication6.Models
 {
@@ -8,9 +9,11 @@ namespace WebApplication6.Models
         Accepted,
         Rejected
     }
+
     public class Maintainance
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Required]
         public int RequestId { get; set; }
 
@@ -26,10 +29,9 @@ namespace WebApplication6.Models
 
         [Required]
         [EnumDataType(typeof(Status), ErrorMessage = "Status must be either 'Pending', 'Accepted', or 'Rejected'.")]
-        public string? Status { get; set; }
+        public String Status { get; set; }
 
         public string? ImagePath { get; set; }
-
-
+        
     }
 }

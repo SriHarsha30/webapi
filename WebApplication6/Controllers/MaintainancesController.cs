@@ -31,84 +31,72 @@ namespace WebApplication6.Controllers
         [HttpGet("owner/{userId}")]
         [Authorize(Roles = "o")]
         public ActionResult<List<Maintainance>> ViewOwnerRequests(string userId)
-
         {
-
-            var maintainances = service.ViewOwnerRequests(userId);
-
-            if (maintainances == null || maintainances.Count == 0)
-
+            try
             {
+                var maintainances = service.ViewOwnerRequests(userId);
 
-                return NotFound("No maintenance requests found for the owner.");
+                if (maintainances == null || maintainances.Count == 0)
+                {
+                    return NotFound("No maintenance requests found for the owner.");
+                }
 
+                return Ok(maintainances);
             }
-
-            return Ok(maintainances);
-
+            catch (Exception ex)
+            {
+                // Log the exception details
+                //_logger.LogError(ex, "Error viewing owner requests");
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpGet("tenant/{userId}")]
         [Authorize(Roles = "t")]
         public ActionResult<List<Maintainance>> ViewTenantRequests(string userId)
-
         {
-
-            var maintainances = service.ViewTenantRequests(userId);
-
-            if (maintainances == null || maintainances.Count == 0)
-
+            try
             {
+                var maintainances = service.ViewTenantRequests(userId);
 
-                return NotFound("No maintenance requests found for the tenant.");
+                if (maintainances == null || maintainances.Count == 0)
+                {
+                    return NotFound("No maintenance requests found for the tenant.");
+                }
 
+                return Ok(maintainances);
             }
-
-            return Ok(maintainances);
-
+            catch (Exception ex)
+            {
+                // Log the exception details
+                // Example: _logger.LogError(ex, "Error viewing tenant requests");
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpPost]
         [Authorize(Roles = "t")]
         public ActionResult InsertMaintainance([FromBody] Maintainance maintainance)
-
         {
-
             try
-
             {
-
                 service.InsertMaintainance(
-
-                    maintainance.RequestId,
-
                     maintainance.PropertyId,
-
                     maintainance.TenantId,
-
                     maintainance.Description,
-
-                    maintainance.Status.ToString(), // Convert enum to string if necessary
-
+                    maintainance.Status,
                     maintainance.ImagePath
-
                 );
-
                 return StatusCode(201, "Maintenance request inserted successfully.");
-
             }
-
             catch (Exception ex)
-
             {
-
-                // Handle exception (log it, return error response, etc.)
-
-                return StatusCode(500, $"An error occurred: {ex.Message}");
-
+                // Log the exception details
+                // Example: _logger.LogError(ex, "Error inserting maintenance request");
+                return StatusCode(500, $"An error occurred: {ex.ToString()}");
             }
-
         }
+
 
         [HttpPut("{requestId}")]
         [Authorize(Roles = "o")]
