@@ -62,6 +62,8 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IMaintainanceRepository, MaintainanceRepository>();
 builder.Services.AddScoped<IMaintainanceService, MaintainanceService>();
 
+builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
+
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
