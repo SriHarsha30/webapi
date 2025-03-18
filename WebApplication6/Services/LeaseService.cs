@@ -36,6 +36,11 @@ namespace testing_Web_Api.Services
 
         public (string leaseId, string ownerId)? CreateLease(string tenantId, int propertyId, DateTime startDate, DateTime endDate, string tenantSignature)
         {
+            if (endDate <= startDate)
+            {
+                throw new ArgumentException("End date must be greater than start date.");
+            }
+
             var existingLease = _leaseRepository.GetAllLeases()
                 .FirstOrDefault(l => l.Property_Id == propertyId && l.Lease_status == true);
             if (existingLease != null)
@@ -68,11 +73,8 @@ namespace testing_Web_Api.Services
                 Owner_Signature = false,
                 Lease_status = false
             };
-            if (endDate > startDate)
-            {
-                _leaseRepository.AddLease(lease);
-            }
             
+                _leaseRepository.AddLease(lease);
             _context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2", tenantId, property.Owner_Id, "tenant signed successfully");
 
             return (lease.LeaseId.ToString(), property.Owner_Id);
