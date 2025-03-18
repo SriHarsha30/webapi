@@ -58,6 +58,7 @@ builder.Services.AddScoped<ILeaseRepository, LeaseRepository>();
 builder.Services.AddScoped<ILeaseService, LeaseService>();
 
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IPaymentService, PaymentServices>();
 
 builder.Services.AddScoped<IMaintainanceRepository, MaintainanceRepository>();
 builder.Services.AddScoped<IMaintainanceService, MaintainanceService>();

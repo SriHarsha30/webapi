@@ -1,62 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using WebApplication6.Models;
-using WebApplication6.Repository;
+using WebApplication6.Services;
 
 namespace WebApplication6.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-
-
     public class PaymentsController : ControllerBase
     {
         private readonly Context _context;
-        private readonly IPaymentRepository _paymentRepository;
+        private readonly IPaymentService _paymentService;
 
-        public PaymentsController(Context context, IPaymentRepository paymentRepository)
+        public PaymentsController(Context context, IPaymentService paymentService)
         {
             _context = context;
-            _paymentRepository = paymentRepository;
+            _paymentService = paymentService;
         }
-
-        // GET: api/Payments
-        //[HttpGet]
-        //[Authorize(Roles = "o,t")]
-        //public async Task<ActionResult<IEnumerable<Payment>>> GetPayments()
-        //{
-        //    return await _context.Payments.ToListAsync();
-        //}
-
-        // GET: api/Payments/5
-        //[HttpGet("{id}")]
-        //[Authorize(Roles = "o,t")]
-        //public async Task<ActionResult<Payment>> GetPayment(int id)
-        //{
-        //    var payment = await _context.Payments.FindAsync(id);
-
-        //    if (payment == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return payment;
-        //}
 
         [HttpGet("GetPaymentsByTenant/{tenantId}")]
         [Authorize(Roles = "t")]
         public async Task<IActionResult> GetPaymentsByTenant(string tenantId)
         {
-            var payments = await _paymentRepository.GetPaymentsByTenantIdAsync(tenantId);
+            var payments = await _paymentService.GetPaymentsByTenantIdAsync(tenantId);
 
             if (payments == null || !payments.Any())
             {
@@ -70,8 +42,7 @@ namespace WebApplication6.Controllers
         [Authorize(Roles = "o")]
         public async Task<IActionResult> GetPaymentsByOwnerid(string oid)
         {
-
-            var payments = await _paymentRepository.GetPaymentsByOwnerid(oid);
+            var payments = await _paymentService.GetPaymentsByOwnerid(oid);
 
             if (payments == null || !payments.Any())
             {
@@ -81,7 +52,17 @@ namespace WebApplication6.Controllers
             return Ok(payments);
         }
 
-        // PUT: api/Payments/5
+        [HttpGet("{id}", Name = "GetPaymentById")]
+        public async Task<IActionResult> GetPaymentById(int id)
+        {
+            var payment = await _context.Payments.FindAsync(id);
+            if (payment == null)
+            {
+                return NotFound();
+            }
+            return Ok(payment);
+        }
+
         [HttpPut("{id}")]
         [Authorize(Roles = "o")]
         public async Task<IActionResult> PutPayment(int id, [FromBody] string ownerStatus)
@@ -92,13 +73,12 @@ namespace WebApplication6.Controllers
                 return NotFound();
             }
 
-            // Use a stored procedure to update the payment status
             var commandText = "EXEC UpdatePaymentStatus @PaymentID, @OwnerStatus";
             var parameters = new[]
             {
-            new SqlParameter("@PaymentID", id),
-            new SqlParameter("@OwnerStatus", ownerStatus)
-             };
+                new SqlParameter("@PaymentID", id),
+                new SqlParameter("@OwnerStatus", ownerStatus)
+            };
 
             try
             {
@@ -109,7 +89,6 @@ namespace WebApplication6.Controllers
                 return NotFound(new { message = ex.Message });
             }
 
-            // If Ownerstatus is true, update the lease status
             if (ownerStatus.Equals("true", StringComparison.OrdinalIgnoreCase))
             {
                 var lease = await _context.Leases1.FirstOrDefaultAsync(l => l.Property_Id == payment.PropertyId);
@@ -121,26 +100,25 @@ namespace WebApplication6.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok(new { message = "Updated successfully." });
         }
 
-        //POST: api/Payments
         [HttpPost]
-       [Authorize(Roles = "t")]
-        public async Task<ActionResult<Payment>> PostPayment(Payment payment)
+        [Authorize(Roles = "t")]
+
+        public async Task<ActionResult<Payment>> PostPayment([Bind("Tenant_Id,PropertyId,Status")] Payment payment)
         {
             if (payment == null)
             {
                 return BadRequest(new { message = "Invalid payment data." });
             }
 
-            // Check if Tenant_Id and PropertyId exist
-            bool tenantAndPropertyExist = await CheckTenantAndPropertyAsync(payment.Tenant_Id, payment.PropertyId);
+            bool tenantAndPropertyExist = await _paymentService.CheckTenantAndPropertyAsync(payment.Tenant_Id, payment.PropertyId);
             if (!tenantAndPropertyExist)
             {
                 return BadRequest(new { message = "Tenant or Property does not exist." });
             }
-            // Check if Tenant_Id and PropertyId exist and if the lease is confirmed
+
             bool isLeaseConfirmed = false;
             try
             {
@@ -151,32 +129,28 @@ namespace WebApplication6.Controllers
                     isLeaseConfirmedParam);
 
                 isLeaseConfirmed = (bool)isLeaseConfirmedParam.Value;
-
             }
             catch (Exception ex)
             {
                 return NotFound(new { message = ex.Message });
             }
 
-
             if (!isLeaseConfirmed)
             {
                 return BadRequest(new { message = "Lease is not yet confirmed." });
             }
 
-            // Fetch the amount from the property
             var property = await _context.Properties.FindAsync(payment.PropertyId);
             if (property == null)
             {
                 return NotFound(new { message = "Property not found." });
             }
 
-            // Create a new Payment object to ensure the constructor is called
             var newPayment = new Payment
             {
                 Tenant_Id = payment.Tenant_Id,
                 PropertyId = payment.PropertyId,
-                Amount = property.PriceOfTheProperty, // Fetch the amount from the property
+                Amount = property.PriceOfTheProperty,
                 Status = payment.Status,
                 Ownerstatus = "Active"
             };
@@ -198,61 +172,14 @@ namespace WebApplication6.Controllers
                 }
             }
 
-            return CreatedAtAction("GetPayment", new { id = newPayment.PaymentID }, newPayment);
-
+            return CreatedAtRoute("GetPaymentById", new { id = newPayment.PaymentID }, newPayment);
         }
 
-
-
-        private async Task<bool> CheckTenantAndPropertyAsync(string tenantId, int propertyId)
-        {
-            var commandText = "EXEC CheckTenantAndProperty @Tenant_Id, @Property_Id";
-            var tenantParam = new SqlParameter("@Tenant_Id", tenantId);
-            var propertyParam = new SqlParameter("@Property_Id", propertyId);
-
-            try
-            {
-                await _context.Database.ExecuteSqlRawAsync(commandText, tenantParam, propertyParam);
-                return true; // If no error is raised, both tenant and property exist
-            }
-            catch (SqlException ex)
-            {
-                // Handle specific error messages if needed
-                if (ex.Message.Contains("Tenant does not exist"))
-                {
-                    return false;
-                }
-                else if (ex.Message.Contains("Property does not exist"))
-                {
-                    return false;
-                }
-                throw;
-            }
-        }
-
-        // DELETE: api/Payments/5
-        //[HttpDelete("{id}")]
-        //[Authorize(Roles = "a")]
-        //public async Task<IActionResult> DeletePayment(int id)
-        //{
-        //    var payment = await _context.Payments.FindAsync(id);
-        //    if (payment == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.Payments.Remove(payment);
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
-
+      
 
         private bool PaymentExists(int id)
         {
             return _context.Payments.Any(e => e.PaymentID == id);
         }
-
-
     }
 }
