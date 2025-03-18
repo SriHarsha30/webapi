@@ -84,14 +84,24 @@ namespace WebApplication6.Controllers
         // POST: api/Registrations
         [AllowAnonymous]
         [HttpPost]
-        
-        public async Task<ActionResult<Registration>> PostRegistration(Registration registration)
+        public async Task<ActionResult<Registration>> PostRegistration(string id, string name, long phonenumber, string role, DateOnly dob, string password, string answer)
         {
-            if (registration == null)
+            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(name) || phonenumber == 0 || string.IsNullOrEmpty(role) || dob == default || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(answer))
             {
-                return BadRequest("Registration object is null.");
+                return BadRequest("Invalid parameters.");
             }
 
+            var registration = new Registration
+            {
+                ID = id,
+                Name = name,
+                PhoneNumber = phonenumber,
+                RoleofUser = role,
+                D_O_B = dob,
+                Password = password,
+                Answer = answer
+            };
+            
             try
             {
                 bool insertionResult = _registrationRepository.Insertion(registration);
@@ -112,32 +122,28 @@ namespace WebApplication6.Controllers
                 Console.WriteLine($"After stored procedure: ID = {registration.ID}, Role = {registration.RoleofUser}");
 
                 // Retrieve the updated registration
-                // Retrieve the updated registration
                 var updatedRegistration = _registrationRepository.readData().FirstOrDefault(r => r.ID == registration.ID);
                 if (updatedRegistration == null)
                 {
                     Console.WriteLine("Updated registration not found.");
                     return Ok(registration); // Return status code 200 with the posted data
                 }
+
                 // Log the retrieved registration
-                Console.WriteLine($"Retrieved registration: ID = {updatedRegistration.ID}, Role = {updatedRegistration.RoleofUser}");
+                Console.WriteLine($"Retrieved registration: ID = {updatedRegistration.ID}, Role = {updatedRegistration.RoleofUser}, Signature = {updatedRegistration.Signature}");
 
                 // Update the registration object with the updated values
                 registration = updatedRegistration;
             }
             catch (DbUpdateException ex)
             {
-                if (_registrationRepository.readData().Any(e => e.ID == registration.ID))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError, $"Database update exception: {ex.Message}");
-                }
+                var innerException = ex.InnerException?.Message;
+                Console.WriteLine($"Database update exception: {innerException}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Database update exception: {innerException}");
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
                 return StatusCode(StatusCodes.Status500InternalServerError, $"An unexpected error occurred: {ex.Message}");
             }
 
