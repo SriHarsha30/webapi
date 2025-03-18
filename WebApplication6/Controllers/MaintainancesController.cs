@@ -78,16 +78,16 @@ namespace WebApplication6.Controllers
 
         [HttpPost]
         [Authorize(Roles = "t")]
-        public ActionResult InsertMaintainance([FromBody] Maintainance maintainance)
+        public ActionResult InsertMaintainance(int PropertyId, string TenantId, string Description,string Status,string ImagePath)
         {
             try
             {
                 service.InsertMaintainance(
-                    maintainance.PropertyId,
-                    maintainance.TenantId,
-                    maintainance.Description,
-                    maintainance.Status,
-                    maintainance.ImagePath
+                    PropertyId,
+                    TenantId,
+                    Description,
+                    Status,
+                    ImagePath
                 );
                 return StatusCode(201, "Maintenance request inserted successfully.");
             }
