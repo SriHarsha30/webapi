@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using WebApplication6.Models;
 using WebApplication6.Services;
 
@@ -105,15 +106,16 @@ namespace WebApplication6.Controllers
 
         [HttpPost]
         [Authorize(Roles = "t")]
-
-        public async Task<ActionResult<Payment>> PostPayment([Bind("Tenant_Id,PropertyId,Status")] Payment payment)
+        public async Task<ActionResult<Payment>> PostPayment( string Tenant_Id, int PropertyId, string Status)
         {
-            if (payment == null)
+            Console.WriteLine("PostPayment method called");
+
+            if ( Tenant_Id== null)
             {
                 return BadRequest(new { message = "Invalid payment data." });
             }
 
-            bool tenantAndPropertyExist = await _paymentService.CheckTenantAndPropertyAsync(payment.Tenant_Id, payment.PropertyId);
+            bool tenantAndPropertyExist = await _paymentService.CheckTenantAndPropertyAsync(Tenant_Id,PropertyId);
             if (!tenantAndPropertyExist)
             {
                 return BadRequest(new { message = "Tenant or Property does not exist." });
@@ -124,8 +126,8 @@ namespace WebApplication6.Controllers
             {
                 var isLeaseConfirmedParam = new SqlParameter("@IsLeaseConfirmed", SqlDbType.Bit) { Direction = ParameterDirection.Output };
                 await _context.Database.ExecuteSqlRawAsync("EXEC CheckLeaseStatus @Tenant_Id, @PropertyId, @IsLeaseConfirmed OUTPUT",
-                    new SqlParameter("@Tenant_Id", payment.Tenant_Id),
-                    new SqlParameter("@PropertyId", payment.PropertyId),
+                    new SqlParameter("@Tenant_Id", Tenant_Id),
+                    new SqlParameter("@PropertyId", PropertyId),
                     isLeaseConfirmedParam);
 
                 isLeaseConfirmed = (bool)isLeaseConfirmedParam.Value;
@@ -138,9 +140,9 @@ namespace WebApplication6.Controllers
             if (!isLeaseConfirmed)
             {
                 return BadRequest(new { message = "Lease is not yet confirmed." });
-            }
+            } 
 
-            var property = await _context.Properties.FindAsync(payment.PropertyId);
+            var property = await _context.Properties.FindAsync(PropertyId);
             if (property == null)
             {
                 return NotFound(new { message = "Property not found." });
@@ -148,10 +150,10 @@ namespace WebApplication6.Controllers
 
             var newPayment = new Payment
             {
-                Tenant_Id = payment.Tenant_Id,
-                PropertyId = payment.PropertyId,
+                Tenant_Id = Tenant_Id,
+                PropertyId = PropertyId,
                 Amount = property.PriceOfTheProperty,
-                Status = payment.Status,
+                Status = Status,
                 Ownerstatus = "Active"
             };
 
@@ -175,7 +177,7 @@ namespace WebApplication6.Controllers
             return CreatedAtRoute("GetPaymentById", new { id = newPayment.PaymentID }, newPayment);
         }
 
-      
+
 
         private bool PaymentExists(int id)
         {
