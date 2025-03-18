@@ -101,7 +101,7 @@ namespace WebApplication6.Controllers
                 Password = password,
                 Answer = answer
             };
-
+            
             try
             {
                 bool insertionResult = _registrationRepository.Insertion(registration);
