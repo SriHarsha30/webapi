@@ -13,7 +13,7 @@ namespace WebApplication6.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-  
+
     public class LeaseController : ControllerBase
     {
         private readonly ILeaseService _leaseService;
@@ -23,21 +23,16 @@ namespace WebApplication6.Controllers
             _leaseService = leaseService;
         }
 
+        
         // POST: api/lease/tenant
         [HttpPost("applytenant")]
         [Authorize(Roles = "t")]
-        public ActionResult CreateLease([FromBody] LeaseRequest leaseRequest)
+        public ActionResult CreateLease(string tenantId, int propertyId, DateTime startDate, DateTime endDate, string signature)
         {
             try
             {
                 // Call the service to create a lease
-                var result = _leaseService.CreateLease(
-                    leaseRequest.ID,
-                    leaseRequest.PropertyId,
-                    leaseRequest.StartDate,
-                    leaseRequest.EndDate,
-                    leaseRequest.Signature
-                );
+                var result = _leaseService.CreateLease(tenantId, propertyId, startDate, endDate, signature);
 
                 // If validation fails
                 if (result == null)
@@ -68,16 +63,12 @@ namespace WebApplication6.Controllers
         // POST: api/lease/owner
         [HttpPost("ownerval")]
         [Authorize(Roles = "o")]
-        public ActionResult FinalizeLease([FromBody] OwnerSignatureRequest ownerRequest)
+        public ActionResult FinalizeLease(int leaseId, string ownerId, string signature)
         {
             try
             {
                 // Call the service to finalize the lease
-                var success = _leaseService.FinalizeLease(
-                    ownerRequest.LeaseId,
-                    ownerRequest.OwnerId,
-                    ownerRequest.Signature
-                );
+                var success = _leaseService.FinalizeLease(leaseId, ownerId, signature);
 
                 // If validation fails
                 if (!success)
@@ -104,6 +95,7 @@ namespace WebApplication6.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
 
         // GET: api/lease/{id}
         [HttpGet("GetLeaseByLId/{id}")]
@@ -174,20 +166,20 @@ namespace WebApplication6.Controllers
         }
     }
 
-    // DTOs
-    public class LeaseRequest
-    {
-        public string ID { get; set; }
-        public int PropertyId { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public string Signature { get; set; }
-    }
 
-    public class OwnerSignatureRequest
-    {
-        public int LeaseId { get; set; }
-        public string OwnerId { get; set; }
-        public string Signature { get; set; }
-    }
+//public class LeaseRequest
+//{
+//    public string ID { get; set; }
+//    public int PropertyId { get; set; }
+//    public DateTime StartDate { get; set; }
+//    public DateTime EndDate { get; set; }
+//    public string Signature { get; set; }
+//}
+
+//public class OwnerSignatureRequest
+//{
+//    public int LeaseId { get; set; }
+//    public string OwnerId { get; set; }
+//    public string Signature { get; set; }
+//}
 }

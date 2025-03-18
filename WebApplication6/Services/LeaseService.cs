@@ -68,8 +68,11 @@ namespace testing_Web_Api.Services
                 Owner_Signature = false,
                 Lease_status = false
             };
-
-            _leaseRepository.AddLease(lease);
+            if (endDate > startDate)
+            {
+                _leaseRepository.AddLease(lease);
+            }
+            
             _context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2", tenantId, property.Owner_Id, "tenant signed successfully");
 
             return (lease.LeaseId.ToString(), property.Owner_Id);
