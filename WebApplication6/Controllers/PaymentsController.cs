@@ -30,27 +30,27 @@ namespace WebApplication6.Controllers
         }
 
         // GET: api/Payments
-        [HttpGet]
-        [Authorize(Roles = "o,t")]
-        public async Task<ActionResult<IEnumerable<Payment>>> GetPayments()
-        {
-            return await _context.Payments.ToListAsync();
-        }
+        //[HttpGet]
+        //[Authorize(Roles = "o,t")]
+        //public async Task<ActionResult<IEnumerable<Payment>>> GetPayments()
+        //{
+        //    return await _context.Payments.ToListAsync();
+        //}
 
         // GET: api/Payments/5
-        [HttpGet("{id}")]
-        [Authorize(Roles = "o,t")]
-        public async Task<ActionResult<Payment>> GetPayment(int id)
-        {
-            var payment = await _context.Payments.FindAsync(id);
+        //[HttpGet("{id}")]
+        //[Authorize(Roles = "o,t")]
+        //public async Task<ActionResult<Payment>> GetPayment(int id)
+        //{
+        //    var payment = await _context.Payments.FindAsync(id);
 
-            if (payment == null)
-            {
-                return NotFound();
-            }
+        //    if (payment == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return payment;
-        }
+        //    return payment;
+        //}
 
         [HttpGet("GetPaymentsByTenant/{tenantId}")]
         [Authorize(Roles = "t")]
@@ -92,45 +92,40 @@ namespace WebApplication6.Controllers
                 return NotFound();
             }
 
-            payment.Ownerstatus = ownerStatus;
+            // Use a stored procedure to update the payment status
+            var commandText = "EXEC UpdatePaymentStatus @PaymentID, @OwnerStatus";
+            var parameters = new[]
+            {
+            new SqlParameter("@PaymentID", id),
+            new SqlParameter("@OwnerStatus", ownerStatus)
+             };
 
-            // If Ownerstatus is true, set Status to true
+            try
+            {
+                await _context.Database.ExecuteSqlRawAsync(commandText, parameters);
+            }
+            catch (SqlException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+
+            // If Ownerstatus is true, update the lease status
             if (ownerStatus.Equals("true", StringComparison.OrdinalIgnoreCase))
             {
-                payment.Status = "true";
                 var lease = await _context.Leases1.FirstOrDefaultAsync(l => l.Property_Id == payment.PropertyId);
                 if (lease != null)
                 {
                     lease.Lease_status = true;
                     _context.Entry(lease).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
                 }
             }
-            
-
-            _context.Entry(payment).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PaymentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
 
             return NoContent();
         }
 
         //POST: api/Payments
-       [HttpPost]
+        [HttpPost]
        [Authorize(Roles = "t")]
         public async Task<ActionResult<Payment>> PostPayment(Payment payment)
         {
@@ -236,21 +231,21 @@ namespace WebApplication6.Controllers
         }
 
         // DELETE: api/Payments/5
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "a")]
-        public async Task<IActionResult> DeletePayment(int id)
-        {
-            var payment = await _context.Payments.FindAsync(id);
-            if (payment == null)
-            {
-                return NotFound();
-            }
+        //[HttpDelete("{id}")]
+        //[Authorize(Roles = "a")]
+        //public async Task<IActionResult> DeletePayment(int id)
+        //{
+        //    var payment = await _context.Payments.FindAsync(id);
+        //    if (payment == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            _context.Payments.Remove(payment);
-            await _context.SaveChangesAsync();
+        //    _context.Payments.Remove(payment);
+        //    await _context.SaveChangesAsync();
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
 
         private bool PaymentExists(int id)

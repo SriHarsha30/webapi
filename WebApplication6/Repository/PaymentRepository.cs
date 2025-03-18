@@ -48,28 +48,7 @@ namespace WebApplication6.Repository
             return _context.Payments.ToList();
         }
 
-        public bool UpdatePaymentStatus(int paymentId, string ownerStatus)
-        {
-            var command = _context.Database.GetDbConnection().CreateCommand();
-            command.CommandText = "UpdatePaymentStatus";
-            command.CommandType = System.Data.CommandType.StoredProcedure;
-
-            var param1 = command.CreateParameter();
-            param1.ParameterName = "@PaymentID";
-            param1.Value = paymentId;
-            command.Parameters.Add(param1);
-
-            var param2 = command.CreateParameter();
-            param2.ParameterName = "@OwnerStatus";
-            param2.Value = ownerStatus;
-            command.Parameters.Add(param2);
-
-            _context.Database.OpenConnection();
-            int rowsAffected = command.ExecuteNonQuery();
-            _context.Database.CloseConnection();
-
-            return rowsAffected > 0;
-        }
+       
 
         public Registration GetTenantDetailsFromRegistration(string tenantId)
         {
@@ -84,7 +63,9 @@ namespace WebApplication6.Repository
             {
                 foreach (var payment in userPayments)
                 {
-                    Console.WriteLine($"PaymentID: {payment.PaymentID}, TenantID: {payment.Tenant_Id}, PropertyID: {payment.PropertyId}, Amount: {payment.Amount}, PaymentDate: {payment.PaymentDate}, Status: {payment.Status}, Ownerstatus: {payment.Ownerstatus}");
+                    Console.WriteLine($"PaymentID: {payment.PaymentID}, TenantID: {payment.Tenant_Id}, " +
+                        $"PropertyID: {payment.PropertyId}, Amount: {payment.Amount}, PaymentDate: {payment.PaymentDate}," +
+                        $" Status: {payment.Status}, Ownerstatus: {payment.Ownerstatus}");
                 }
             }
             else
@@ -104,7 +85,9 @@ namespace WebApplication6.Repository
             {
                 foreach (var payment in userPayments)
                 {
-                    Console.WriteLine($"PaymentID: {payment.PaymentID}, TenantID: {payment.Tenant_Id}, PropertyID: {payment.PropertyId}, Amount: {payment.Amount}, PaymentDate: {payment.PaymentDate}, Status: {payment.Status}, Ownerstatus: {payment.Ownerstatus}");
+                    Console.WriteLine($"PaymentID: {payment.PaymentID}, TenantID: {payment.Tenant_Id}," +
+                        $" PropertyID: {payment.PropertyId}, Amount: {payment.Amount}, PaymentDate: {payment.PaymentDate}," +
+                        $" Status: {payment.Status}, Ownerstatus: {payment.Ownerstatus}");
                 }
             }
             else

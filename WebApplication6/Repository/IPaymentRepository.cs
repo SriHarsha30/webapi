@@ -6,7 +6,6 @@ namespace WebApplication6.Repository
     {
         void InsertPayment(Payment payment);
         List<Payment> GetAllPayments();
-        bool UpdatePaymentStatus(int paymentId, string status);
         Registration GetTenantDetailsFromRegistration(string tenantId);
         void ShowAllPayments(string userId);
         void ShowAllPaymentsOwner(string userId);

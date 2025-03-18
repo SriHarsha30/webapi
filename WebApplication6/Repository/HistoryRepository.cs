@@ -25,8 +25,11 @@ namespace WebApplication6.Repository
 
         public IEnumerable<dynamic> GetTenantHistoryForOwner(string tenantId)
         {
+            Console.WriteLine("ID :" + tenantId);
+            
             return _context.Histories
                 .FromSqlRaw("EXEC GetTenantHistoryForOwner @Tenant_id = {0}", tenantId)
+                .AsEnumerable() // Switch to client-side evaluation
                 .Select(h => new
                 {
                     h.Tenant_name,

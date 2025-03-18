@@ -24,7 +24,8 @@ namespace WebApplication6.Models
 
         [Required(ErrorMessage = "Password is required.")]
         [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters long.")]
-        [RegularExpression(@"^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*\d).+$", ErrorMessage = "Password must contain at least one uppercase letter, one special character, and one number.")]
+        [RegularExpression(@"^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*\d).+$", ErrorMessage = "Password must contain at" +
+            " least one uppercase letter, one special character, and one number.")]
         public string Password { get; set; }
 
         [Required]
