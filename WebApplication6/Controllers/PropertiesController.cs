@@ -17,11 +17,12 @@ namespace WebApplication5.Controllers
     {
         private readonly IProperty _repository;
         private readonly Context _context;
-
-        public PropertiesController(IProperty repository, Context context)
+        private readonly IRegistrationRepository _registrationRepository;
+        public PropertiesController(IProperty repository, Context context,IRegistrationRepository registrationRepository)
         {
             _repository = repository;
             _context = context;
+            _registrationRepository = registrationRepository;
         }
 
         // GET: api/Properties
@@ -105,11 +106,32 @@ namespace WebApplication5.Controllers
             return NoContent();
         }
 
-        // POST: api/Properties
         [HttpPost]
         [Authorize(Roles = "o")]
-        public async Task<ActionResult<Property>> PostProperty(Property property)
+        public async Task<ActionResult<Property>> PostProperty(string address, string description, string owner_Id, bool availableStatus, string owner_Signature,decimal Price)
         {
+            var property = new Property
+            {
+                Address = address,
+                Description = description,
+                Owner_Id = owner_Id,
+                AvailableStatus = availableStatus,
+                Owner_Signature = owner_Signature,
+                PriceOfTheProperty=Price
+            };
+
+            var tenant = _registrationRepository.readData().FirstOrDefault(i => i.ID == owner_Id);
+
+            if (tenant == null)
+            {
+                return BadRequest("Owner not found.");
+            }
+
+            if (tenant.Signature != owner_Signature)
+            {
+                return BadRequest("Invalid owner signature.");
+            }
+
             _repository.Insert(property);
             await _repository.SaveChangesAsync();
 

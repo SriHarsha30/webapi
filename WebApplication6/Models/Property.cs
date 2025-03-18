@@ -29,5 +29,8 @@ namespace WebApplication6.Models
 
         [NotMapped]
         public long? Owner_PhoneNumber { get; set; }
+
+        [NotMapped]
+        public string Owner_Signature { get; set; }
     }
 }
