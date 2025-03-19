@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using WebApplication6.Repository;
 using WebApplication6.Models;
 using Microsoft.AspNetCore.Authorization;
+using WebApplication6.Exceptions;
 
 namespace WebApplication5.Controllers
 {
@@ -56,9 +57,17 @@ namespace WebApplication5.Controllers
         {
             //var property = await _repository._context.Properties.FindAsync(id);
             var property = await _repository.FindAsync(id);
-            if (property == null)
+            try
             {
-                return NotFound();
+                if (property == null)
+                {
+                    throw new Propertynotfoundexception();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"error: {ex.Message}");
             }
 
             // Call the stored procedure to get owner details

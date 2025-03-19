@@ -39,7 +39,7 @@ namespace WebApplication6.Models
 
         public string Status { get; set; }
 
-        [StringLength(50, ErrorMessage = "Ownerstatus cannot be longer than 50 characters.")]
+        [StringLength(10, ErrorMessage = "Ownerstatus cannot be longer than 10 characters.")]
 
         public string Ownerstatus { get; set; }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication6.Models;
 using WebApplication6.Repository;
@@ -17,6 +18,7 @@ namespace WebApplication6.Controllers
         }
 
         [HttpGet("tenant-history/{tenantId}")]
+        [Authorize(Roles = "t")]
         public ActionResult<IEnumerable<History>> GetTenantHistory(string tenantId)
         {
             var history = _historyRepository.GetTenantHistory(tenantId);
@@ -28,6 +30,7 @@ namespace WebApplication6.Controllers
         }
 
         [HttpGet("owner-tenant-history/{tenantId}")]
+        [Authorize(Roles = "o")]
         public ActionResult<IEnumerable<dynamic>> GetTenantHistoryForOwner(string tenantId)
         {
             var history = _historyRepository.GetTenantHistoryForOwner(tenantId);
