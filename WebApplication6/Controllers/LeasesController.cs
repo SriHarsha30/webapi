@@ -31,32 +31,26 @@ namespace WebApplication6.Controllers
         {
             try
             {
-                // Call the service to create a lease
                 var result = _leaseService.CreateLease(tenantId, propertyId, startDate, endDate, signature);
 
-                // If validation fails
                 if (result == null)
                 {
                     return BadRequest("Tenant signature validation failed or lease already exists.");
                 }
 
-                // Success response
                 return Ok($"Lease created successfully with Lease ID: {result?.leaseId}, Owner ID: {result?.ownerId}");
             }
             catch (KeyNotFoundException ex)
             {
-                // For missing entities like Property or Tenant
                 return NotFound($"Error: {ex.Message}");
             }
             catch (ArgumentException ex)
             {
-                // For invalid arguments like incorrect signature
                 return BadRequest($"Error: {ex.Message}");
             }
             catch (Exception ex)
             {
-                // Generic error handler
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, $"error: {ex.Message}");
             }
         }
 
@@ -67,31 +61,25 @@ namespace WebApplication6.Controllers
         {
             try
             {
-                // Call the service to finalize the lease
                 var success = _leaseService.FinalizeLease(leaseId, ownerId, signature);
 
-                // If validation fails
                 if (!success)
                 {
                     return BadRequest("Owner signature validation failed or lease is already finalized.");
                 }
 
-                // Success response
                 return Ok("Lease finalized successfully.");
             }
             catch (KeyNotFoundException ex)
             {
-                // For missing entities like Lease or Owner
                 return NotFound($"Error: {ex.Message}");
             }
             catch (ArgumentException ex)
             {
-                // For invalid arguments like incorrect signature
                 return BadRequest($"Error: {ex.Message}");
             }
             catch (Exception ex)
             {
-                // Generic error handler
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -104,7 +92,6 @@ namespace WebApplication6.Controllers
         {
             try
             {
-                // Call the service to retrieve the lease
                 var lease = _leaseService.GetLeaseById(id);
 
                 if (lease == null)
@@ -112,7 +99,6 @@ namespace WebApplication6.Controllers
                     return NotFound("Lease not found.");
                 }
 
-                // Return lease details
                 return Ok(lease);
             }
             catch (Exception ex)
@@ -129,7 +115,6 @@ namespace WebApplication6.Controllers
         {
             try
             {
-                // Call the service to retrieve leases by owner
                 var leases = _leaseService.GetLeasesByOwner(ownerId);
 
                 if (!leases.Any())
@@ -137,7 +122,6 @@ namespace WebApplication6.Controllers
                     return NotFound("No leases found for this owner.");
                 }
 
-                // Return list of leases
                 return Ok(leases);
             }
             catch (Exception ex)
@@ -153,10 +137,8 @@ namespace WebApplication6.Controllers
         {
             try
             {
-                // Call the service to retrieve all leases
                 var leases = _leaseService.GetAllLeases();
 
-                // Return list of leases
                 return Ok(leases);
             }
             catch (Exception ex)
@@ -165,21 +147,4 @@ namespace WebApplication6.Controllers
             }
         }
     }
-
-
-//public class LeaseRequest
-//{
-//    public string ID { get; set; }
-//    public int PropertyId { get; set; }
-//    public DateTime StartDate { get; set; }
-//    public DateTime EndDate { get; set; }
-//    public string Signature { get; set; }
-//}
-
-//public class OwnerSignatureRequest
-//{
-//    public int LeaseId { get; set; }
-//    public string OwnerId { get; set; }
-//    public string Signature { get; set; }
-//}
 }

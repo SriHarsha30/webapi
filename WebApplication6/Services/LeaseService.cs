@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
+using WebApplication6.Exceptions;
 
 namespace testing_Web_Api.Services
 {
@@ -38,7 +39,7 @@ namespace testing_Web_Api.Services
         {
             if (endDate <= startDate)
             {
-                throw new ArgumentException("End date must be greater than start date.");
+                throw new InvalidDateRangeException();
             }
 
             var existingLease = _leaseRepository.GetAllLeases()
@@ -98,15 +99,6 @@ namespace testing_Web_Api.Services
 
 
             lease.Owner_Signature = true;
-    //        string ownerStatus = _context.Database.ExecuteSqlRaw(
-    //    "EXEC GetOwnerStatusByLeaseId @p0", leaseId
-    //).ToString();
-            
-    //        if (ownerStatus != "true")
-    //        {
-    //            return false; 
-    //        }
-
             lease.Lease_status = false;
 
             _leaseRepository.UpdateLease(lease);
