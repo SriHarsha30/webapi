@@ -93,7 +93,7 @@ namespace WebApplication6.Services
             {
 
                 return _repository.UpdateStatus(requestId, newStatus);
-                //_context.Database.ExecuteSqlRaw("EXEC InsertIntoNotificcation1 @p0, @p1, @p2", tenantId, ownerId, "a Maintainance request was made");
+                //_context.Database.ExecuteSqlRaw("EXEC InsertIntoNotification1 @p0, @p1, @p2", tenantId, ownerId, "a Maintainence request was made");
 
 
             }
