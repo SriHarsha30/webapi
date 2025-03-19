@@ -36,7 +36,7 @@ namespace WebApplication6.Controllers
             var history = _historyRepository.GetTenantHistoryForOwner(tenantId);
             if (history == null || !history.Any())
             {
-                return NotFound("Tenant history for owner not found.");
+                return NotFound("Tenant history of owner not found.");
             }
             return Ok(history);
         }
