@@ -99,9 +99,9 @@ namespace WebApplication6.Controllers
                 RoleofUser = role,
                 D_O_B = dob,
                 Password = password,
-                Answer = answer
+                Answer = answer,
+                Signature = "string"
             };
-            
             try
             {
                 bool insertionResult = _registrationRepository.Insertion(registration);
@@ -149,7 +149,6 @@ namespace WebApplication6.Controllers
 
             return CreatedAtAction("GetRegistration", new { id = registration.ID }, registration);
         }
-
         //// DELETE: api/Registrations/5
         //[HttpDelete("{id}")]
         //[Authorize]
