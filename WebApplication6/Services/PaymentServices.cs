@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using WebApplication6.Exceptions;
 using WebApplication6.Models;
 
 namespace WebApplication6.Services
@@ -49,11 +50,11 @@ namespace WebApplication6.Services
                 // Handle specific error messages if needed
                 if (ex.Message.Contains("Tenant does not exist"))
                 {
-                    return false;
+                    throw new TenentnotfoundException("Tenant does not exist");
                 }
                 else if (ex.Message.Contains("Property does not exist"))
                 {
-                    return false;
+                    throw new Propertynotfoundexception("PropertyNotFound");
                 }
                 throw;
             }
