@@ -22,7 +22,6 @@ namespace WebApplication6.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
             modelBuilder.Entity<Lease>().ToTable(Tb => Tb.HasTrigger("InsertHistoryOnLeaseUpdate"));
             modelBuilder.Entity<History>().HasNoKey();
         }

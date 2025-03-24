@@ -16,7 +16,7 @@ namespace WebApplication6.Controllers
     public class RegistrationsController : ControllerBase
     {
         private readonly IRegistrationRepository _registrationRepository;
-        private readonly Context _context;
+        private readonly Context _context;  
         private readonly IAuth _jwtAuth;
 
 
