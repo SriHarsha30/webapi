@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,7 @@ namespace WebApplication6.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-
+    [EnableCors("MyCorsPolicy")]
     public class NotificationsController : ControllerBase
 
     {
@@ -81,9 +82,9 @@ namespace WebApplication6.Controllers
 
         // GET: api/Notifications/ByUID/{senderId}
 
-        [HttpGet("ByUID/{senderId}")]
+        [HttpGet("ByUID/{uId}")]
         [Authorize(Roles = "o,t")]
-        public ActionResult<IEnumerable<Notification>> GetNotificationsBySender(string senderId)
+        public ActionResult<IEnumerable<Notification>> GetNotificationsBySender(string uId)
 
         {
 
@@ -91,13 +92,13 @@ namespace WebApplication6.Controllers
 
             {
 
-                var notifications = _notificationService.GetNotificationsBySenderId(senderId);
+                var notifications = _notificationService.GetNotificationsBySenderId(uId);
 
                 if (notifications == null || !notifications.Any())
 
                 {
 
-                    return NotFound($"No notifications found for sender ID {senderId}.");
+                    return NotFound($"No notifications found for ID {uId}.");
 
                 }
 

@@ -29,6 +29,10 @@ namespace WebApplication6.Repository
 
         public void AddNotification(Notification notification)
         {
+            if (notification.CreatedDate == DateTime.MinValue)
+            {
+                notification.CreatedDate = DateTime.UtcNow; // Set current timestamp if not provided
+            }
             _context.notifications1.Add(notification);
             _context.SaveChanges();
         }

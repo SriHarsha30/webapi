@@ -6,9 +6,10 @@ namespace WebApplication6.Repository
 {
     public interface ILeaseRepository
     {
-        IEnumerable<Lease> GetAllLeases();
-        Lease GetLeaseById(int leaseId);
-        void AddLease(Lease lease);
-        void UpdateLease(Lease lease);
+        Task<IEnumerable<Lease>> GetAllLeasesAsync(); 
+        Task<Lease> GetLeaseByIdAsync(int leaseId);
+        Task AddLeaseAsync(Lease lease);
+        Task UpdateLeaseAsync(Lease lease);
+        Task<IEnumerable<Lease>> GetLeasesByTenantIdAsync(string tenantId);
     }
 }

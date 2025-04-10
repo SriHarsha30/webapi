@@ -7,10 +7,10 @@ namespace WebApplication6.Services
     {
         private readonly INotificationRepository _notificationRepository;
 
-        // Correct Constructor
+        
         public NotificationService(INotificationRepository notificationRepository)
         {
-            _notificationRepository = notificationRepository; // Assigns the dependency
+            _notificationRepository = notificationRepository;
         }
 
         public IEnumerable<Notification> GetAllNotifications()
