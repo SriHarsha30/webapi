@@ -30,7 +30,7 @@ namespace WebApplication5.Controllers
 
         // GET: api/Properties
         [HttpGet]
-        //[Authorize(Roles = "o,t")]
+        [Authorize(Roles = "o,t")]
         public async Task<ActionResult<IEnumerable<Property>>> GetProperties()
         {
             var properties = await Task.FromResult(_repository.ViewData());
@@ -54,7 +54,7 @@ namespace WebApplication5.Controllers
 
         // GET: api/Properties/5
         [HttpGet("{id}")]
-        //[Authorize(Roles = "o,t")]
+        [Authorize(Roles = "o,t")]
         public async Task<ActionResult<Property>> GetProperty(int id)
         {
             //var property = await _repository._context.Properties.FindAsync(id);
@@ -88,7 +88,7 @@ namespace WebApplication5.Controllers
 
         // PUT: api/Properties/5
         [HttpPut("{id}")]
-        //[Authorize(Roles = "o")]
+        [Authorize(Roles = "o")]
         public async Task<IActionResult> PutProperty(int id, Property property)
         {
             if (id != property.Property_Id)
@@ -118,7 +118,7 @@ namespace WebApplication5.Controllers
         }
 
         [HttpPost]
-        //[Authorize(Roles = "o")]
+        [Authorize(Roles = "o")]
         public async Task<ActionResult<Property>> PostProperty(string address, string description, string owner_Id, bool availableStatus, string owner_Signature,decimal Price)
         {
             var property = new Property
@@ -151,7 +151,7 @@ namespace WebApplication5.Controllers
 
         // DELETE: api/Properties/5
         [HttpDelete("{id}")]
-        //[Authorize(Roles = "o")]
+        [Authorize(Roles = "o")]
         public async Task<IActionResult> DeleteProperty(int id)
         {
             var property = await _repository.FindAsync(id);

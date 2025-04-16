@@ -17,7 +17,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyCorsPolicy", builder => builder
-        .WithOrigins("http://localhost:3000") // Frontend origin
+        .WithOrigins("http://localhost:3000", "http://localhost:3002", "http://localhost:3001", "http://localhost:3003", "http://localhost:3004", "http://localhost:3005") // Frontend origin
         .AllowAnyMethod() // Allow all HTTP methods
         .AllowCredentials() // Allow credentials (cookies)
         .WithHeaders("Accept", "Content-Type", "Origin", "X-My-Header", "Authorization") // Include Authorization header
