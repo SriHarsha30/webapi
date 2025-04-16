@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +14,7 @@ namespace WebApplication6.Controllers
 {
     [Route("api/[controller]")]
     [ApiController()]
-    
+    [EnableCors("MyCorsPolicy")]
     public class RegistrationsController : ControllerBase
     {
         private readonly IRegistrationRepository _registrationRepository;
@@ -29,7 +31,7 @@ namespace WebApplication6.Controllers
 
         // GET: api/Registrations
         [HttpGet]
-        [Authorize(Roles ="o")]
+        //[Authorize(Roles ="o")]
         public async Task<ActionResult<IEnumerable<Registration>>> GetRegistrationss()
         {
             return await Task.FromResult(_registrationRepository.readData());
@@ -37,7 +39,7 @@ namespace WebApplication6.Controllers
 
         // GET: api/Registrations/5
         [HttpGet("{id}")]
-        [Authorize(Roles = "o")]
+        //[Authorize(Roles = "o")]
         public async Task<ActionResult<Registration>> GetRegistration(string id)
         {
             var registration = _registrationRepository.readData().FirstOrDefault(r => r.ID == id);
@@ -52,7 +54,7 @@ namespace WebApplication6.Controllers
 
         // PUT: api/Registrations/5
         [HttpPut("{id}")]
-        [Authorize(Roles = "o")]
+        //[Authorize(Roles = "o")]
         public async Task<IActionResult> PutRegistration(string id, Registration registration)
         {
             if (id != registration.ID)
@@ -84,7 +86,15 @@ namespace WebApplication6.Controllers
         // POST: api/Registrations
         [AllowAnonymous]
         [HttpPost]
-        public async Task<ActionResult<Registration>> PostRegistration(string id, string name, long phonenumber, string role, DateOnly dob, string password, string answer)
+        public async Task<ActionResult<Registration>> PostRegistration(
+            string id,
+            string name,
+            long phonenumber,
+            string role,
+            DateOnly dob,
+            string password,
+            string answer,
+            string signature)
         {
             if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(name) || phonenumber == 0 || string.IsNullOrEmpty(role) || dob == default || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(answer))
             {
@@ -100,8 +110,19 @@ namespace WebApplication6.Controllers
                 D_O_B = dob,
                 Password = password,
                 Answer = answer,
-                Signature = "string"
+                Signature = signature
             };
+
+            // Validate the model manually
+            var validationContext = new ValidationContext(registration, null, null);
+            var validationResults = new List<ValidationResult>();
+            bool isValid = Validator.TryValidateObject(registration, validationContext, validationResults, true);
+
+            if (!isValid)
+            {
+                return BadRequest(validationResults);
+            }
+
             try
             {
                 bool insertionResult = _registrationRepository.Insertion(registration);

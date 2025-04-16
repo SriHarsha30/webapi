@@ -47,6 +47,14 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 var key = "This is my first secret Test Key for authentication, test it and use it when needed";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MyCorsPolicy", builder => builder
+        .WithOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:3004", "http://localhost:3005", "http://localhost:3002")
+        .AllowAnyMethod()
+        .AllowCredentials()
+        .WithHeaders("Accept", "Content-Type", "Origin", "X-My-Header"));
+});
 builder.Services.AddDbContext<Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
 builder.Services.AddScoped<IProperty, PropertyRepository>();
@@ -97,6 +105,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("MyCorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

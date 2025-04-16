@@ -16,6 +16,7 @@ namespace WebApplication6.Repository
         public int LoginChk(string userId, string password, out bool isPasswordReset, string answer = null, string newPassword = null)
         {
             isPasswordReset = false;
+
             if (password != null)
             {
                 var u = new SqlParameter("@UserName", userId);
@@ -34,12 +35,27 @@ namespace WebApplication6.Repository
                 var paak = new SqlParameter("@USERID", userId);
                 var kaak = new SqlParameter("@pass", newPassword);
                 var aak = new SqlParameter("@ans", answer);
-                _context.Database.ExecuteSqlRaw("EXEC ChangePas @USERID, @pass, @ans", paak, kaak, aak);
-                isPasswordReset = true;
-                return 1;
+                var resParam = new SqlParameter("@res", System.Data.SqlDbType.Int)
+                {
+                    Direction = System.Data.ParameterDirection.Output
+                };
+
+                _context.Database.ExecuteSqlRaw("EXEC ChangePas @USERID, @pass, @ans, @res OUTPUT", paak, kaak, aak, resParam);
+
+                if ((int)resParam.Value == 1)
+                {
+                    isPasswordReset = true;
+                    return 1;
+                }
+                else
+                {
+                    return 0; // Invalid answer or user ID
+                }
             }
-            return 0;
+
+            return 0; // Invalid request
         }
+
 
         public bool Insertion(Registration a)
         {
@@ -75,9 +91,14 @@ namespace WebApplication6.Repository
             throw new NotImplementedException();
         }
 
-        List<Property> IRegistrationRepository.viewData()
-        {
-            throw new NotImplementedException();
-        }
+        //internal List<Property> viewData()
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //List<Property> IRegistrationRepository.viewData()
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }
