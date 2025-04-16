@@ -7,55 +7,42 @@ using System.Threading.Tasks;
 namespace WebApplication6.Repository
 {
     public class LeaseRepository : ILeaseRepository
-
     {
-
         private readonly Context _context;
 
         public LeaseRepository(Context context)
-
         {
-
             _context = context;
-
         }
 
-        public IEnumerable<Lease> GetAllLeases()
-
+        public async Task<IEnumerable<Lease>> GetAllLeasesAsync()
         {
-
-            return _context.Leases1.ToList();
-
+            return await _context.Leases1.ToListAsync();
         }
 
-        public Lease GetLeaseById(int leaseId)
-
+        public async Task<Lease> GetLeaseByIdAsync(int leaseId)
         {
-
-            return _context.Leases1.FirstOrDefault(l => l.LeaseId == leaseId);
-
+            return await _context.Leases1.FirstOrDefaultAsync(l => l.LeaseId == leaseId);
         }
 
-        public void AddLease(Lease lease)
-
+        public async Task AddLeaseAsync(Lease lease)
         {
-
-            _context.Leases1.Add(lease);
-
-            _context.SaveChanges();
-
+            await _context.Leases1.AddAsync(lease);
+            await _context.SaveChangesAsync();
         }
 
-        public void UpdateLease(Lease lease)
-
+        public async Task UpdateLeaseAsync(Lease lease)
         {
+            _context.Leases1.Update(lease); 
+            await _context.SaveChangesAsync(); 
+        }
 
-            _context.Leases1.Update(lease);
-
-            _context.SaveChanges();
-
+        public async Task<IEnumerable<Lease>> GetLeasesByTenantIdAsync(string tenantId)
+        {
+            return await _context.Leases1
+                .Where(l => l.ID == tenantId)
+                .ToListAsync();
         }
 
     }
-
 }

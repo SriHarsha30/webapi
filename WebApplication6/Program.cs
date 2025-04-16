@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using testing_Web_Api.Services;
 using WebApplication6;
 using WebApplication6.Models;
 using WebApplication6.Repository;
@@ -15,6 +14,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MyCorsPolicy", builder => builder
+        .WithOrigins("http://localhost:3000") // Frontend origin
+        .AllowAnyMethod() // Allow all HTTP methods
+        .AllowCredentials() // Allow credentials (cookies)
+        .WithHeaders("Accept", "Content-Type", "Origin", "X-My-Header", "Authorization") // Include Authorization header
+    );
+});
 
 builder.Services.AddSwaggerGen(c =>
 {

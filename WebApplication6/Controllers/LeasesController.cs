@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using WebApplication6.Models;
 using WebApplication6.Services;
 
 namespace WebApplication6.Controllers
 {
+    [EnableCors("MyCorsPolicy")]
     [Route("api/[controller]")]
     [ApiController]
-
     public class LeaseController : ControllerBase
     {
         private readonly ILeaseService _leaseService;
@@ -23,15 +21,14 @@ namespace WebApplication6.Controllers
             _leaseService = leaseService;
         }
 
-        
         // POST: api/lease/tenant
         [HttpPost("applytenant")]
         [Authorize(Roles = "t")]
-        public ActionResult CreateLease(string tenantId, int propertyId, DateTime startDate, DateTime endDate, string signature)
+        public async Task<ActionResult> CreateLease(string tenantId, int propertyId, DateTime startDate, DateTime endDate, string signature)
         {
             try
             {
-                var result = _leaseService.CreateLease(tenantId, propertyId, startDate, endDate, signature);
+                var result = await _leaseService.CreateLeaseAsync(tenantId, propertyId, startDate, endDate, signature);
 
                 if (result == null)
                 {
@@ -50,18 +47,18 @@ namespace WebApplication6.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"error: {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
         // POST: api/lease/owner
         [HttpPost("ownerval")]
         [Authorize(Roles = "o")]
-        public ActionResult FinalizeLease(int leaseId, string ownerId, string signature)
+        public async Task<ActionResult> FinalizeLease(int leaseId, string ownerId, string signature)
         {
             try
             {
-                var success = _leaseService.FinalizeLease(leaseId, ownerId, signature);
+                var success = await _leaseService.FinalizeLeaseAsync(leaseId, ownerId, signature);
 
                 if (!success)
                 {
@@ -84,15 +81,14 @@ namespace WebApplication6.Controllers
             }
         }
 
-
         // GET: api/lease/{id}
         [HttpGet("GetLeaseByLId/{id}")]
         [Authorize(Roles = "o,t")]
-        public ActionResult<Lease> GetLeaseById(int id)
+        public async Task<ActionResult<Lease>> GetLeaseById(int id)
         {
             try
             {
-                var lease = _leaseService.GetLeaseById(id);
+                var lease = await _leaseService.GetLeaseByIdAsync(id);
 
                 if (lease == null)
                 {
@@ -108,16 +104,15 @@ namespace WebApplication6.Controllers
         }
 
         // GET: api/lease/owner/{ownerId}
-
         [HttpGet("ownersleases/{ownerId}")]
         [Authorize(Roles = "o,t")]
-        public ActionResult<IEnumerable<Lease>> GetLeasesByOwner(string ownerId)
+        public async Task<ActionResult<IEnumerable<Lease>>> GetLeasesByOwner(string ownerId)
         {
             try
             {
-                var leases = _leaseService.GetLeasesByOwner(ownerId);
+                var leases = await _leaseService.GetLeasesByOwnerAsync(ownerId);
 
-                if (!leases.Any())
+                if (leases == null || !leases.Any())
                 {
                     return NotFound("No leases found for this owner.");
                 }
@@ -133,11 +128,11 @@ namespace WebApplication6.Controllers
         // GET: api/lease
         [HttpGet]
         [Authorize(Roles = "o,t")]
-        public ActionResult<IEnumerable<Lease>> GetAllLeases()
+        public async Task<ActionResult<IEnumerable<Lease>>> GetAllLeases()
         {
             try
             {
-                var leases = _leaseService.GetAllLeases();
+                var leases = await _leaseService.GetAllLeasesAsync();
 
                 return Ok(leases);
             }
@@ -146,5 +141,25 @@ namespace WebApplication6.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpGet("GetLeasesByTenantId/{tenantId}")]
+        [Authorize(Roles = "t")]
+        public async Task<IActionResult> GetLeasesByTenantId(string tenantId)
+        {
+            try
+            {
+                var leases = await _leaseService.GetLeasesByTenantAsync(tenantId);
+                return Ok(leases);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred.", details = ex.Message });
+            }
+        }
+
     }
 }

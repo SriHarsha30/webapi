@@ -13,13 +13,13 @@ namespace WebApplication6.Models
         public string? ID { get; set; }
 
         [ForeignKey("ID")]
-        public virtual Registration? Tenant { get; set; }
+        public Registration? Tenant { get; set; }
 
         [Required]
         public int? Property_Id { get; set; }
 
         [ForeignKey("Property_Id")]
-        public virtual Property? Prop { get; set; }
+        public  Property? Prop { get; set; }
 
         [Required]
         [DataType(DataType.Date, ErrorMessage = "wrong format")]
