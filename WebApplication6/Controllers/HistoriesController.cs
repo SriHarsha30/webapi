@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication6.Models;
 using WebApplication6.Repository;
@@ -8,6 +9,7 @@ namespace WebApplication6.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("MyCorsPolicy")]
     public class HistoryController : ControllerBase
     {
         private readonly IHistoryRepository _historyRepository;

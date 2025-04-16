@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication6.Models;
 
@@ -8,6 +9,7 @@ namespace WebApplication6.Controllers
     [Route("api/[controller]")]
     [Authorize]
     [AllowAnonymous]
+    [EnableCors("MyCorsPolicy")]
     public class AuthController : ControllerBase
     {
         private readonly IAuth _authService;
