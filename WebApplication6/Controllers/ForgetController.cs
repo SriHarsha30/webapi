@@ -4,11 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using WebApplication6.Models;
 using WebApplication6.Repository;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Cors;
 
 namespace WebApplication6.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [EnableCors("MyCorsPolicy")]
     public class ForgetController : ControllerBase
     {
         private readonly IRegistrationRepository _registrationRepository;
