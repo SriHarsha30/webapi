@@ -110,6 +110,22 @@ namespace WebApplication6.Services
 
         }
 
+        public List<Maintainance> ViewallOwnerRequests(string userId)
+        {
+            try
+            {
+                if (!_repository.TenantExists(userId))
+                {
+                    throw new Exception($"Owner with ID {userId} does not exist.");
+                }
+                return _repository.ViewallOwnerRequests(userId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An (ser) error occurred while viewing owner requests.", ex);
+            }
+        }
+
     }
 
 }

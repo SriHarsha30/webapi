@@ -120,6 +120,29 @@ namespace WebApplication6.Controllers
 
         }
 
+        [HttpGet("all_owner/{userId}")]
+        [Authorize(Roles = "o")]
+        public ActionResult<List<Maintainance>> ViewallOwnerRequests(string userId)
+        {
+            try
+            {
+                var maintainances = service.ViewallOwnerRequests(userId);
+
+                if (maintainances == null || maintainances.Count == 0)
+                {
+                    return NotFound("No maintenance requests found for the owner.");
+                }
+
+                return Ok(maintainances);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details
+                //_logger.LogError(ex, "Error viewing owner requests");
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
     }
 
 }

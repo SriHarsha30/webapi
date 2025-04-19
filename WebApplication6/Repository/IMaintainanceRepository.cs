@@ -21,6 +21,8 @@ namespace WebApplication6.Repository
 
         bool TenantExists(string tenantId);
 
+        List<Maintainance> ViewallOwnerRequests(string userId);
+
     }
 
 }
