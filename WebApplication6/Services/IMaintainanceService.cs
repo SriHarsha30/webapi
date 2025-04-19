@@ -11,5 +11,7 @@ namespace WebApplication6.Services
         List<Maintainance> ViewOwnerRequests(string userId);
 
         bool UpdateStatus(int RequestId, string newStatus);
+
+        List<Maintainance> ViewallOwnerRequests(string userId);
     }
 }

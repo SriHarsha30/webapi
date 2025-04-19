@@ -132,5 +132,22 @@ namespace WebApplication6.Repository
             return _context.Leases1.Any(l => l.Property_Id == propertyId && l.Lease_status == true);
         }
 
+        public List<Maintainance> ViewallOwnerRequests(string userId)
+{
+    try
+    {
+        var ownerIdParam = new SqlParameter("@OwnerId", userId);
+        var maintainances = _context.Maintainances
+            .FromSqlRaw("EXEC sp_GetallMaintainancesByOwnerId @OwnerId", ownerIdParam)
+            .ToList();
+ 
+        return maintainances;
+    }
+    catch (Exception ex)
+    {
+        throw new Exception("An (repo) error occurred while viewing owner requests.", ex);
+    }
+}
+
     }
 }
