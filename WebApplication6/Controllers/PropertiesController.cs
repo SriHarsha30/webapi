@@ -15,13 +15,13 @@ namespace WebApplication5.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [EnableCors("MyCorsPolicy")]
-
     public class PropertiesController : ControllerBase
     {
         private readonly IProperty _repository;
         private readonly Context _context;
         private readonly IRegistrationRepository _registrationRepository;
-        public PropertiesController(IProperty repository, Context context,IRegistrationRepository registrationRepository)
+
+        public PropertiesController(IProperty repository, Context context, IRegistrationRepository registrationRepository)
         {
             _repository = repository;
             _context = context;
@@ -30,7 +30,7 @@ namespace WebApplication5.Controllers
 
         // GET: api/Properties
         [HttpGet]
-        [Authorize(Roles = "o,t")]
+        //[Authorize(Roles = "o,t")]
         public async Task<ActionResult<IEnumerable<Property>>> GetProperties()
         {
             var properties = await Task.FromResult(_repository.ViewData());
@@ -54,17 +54,15 @@ namespace WebApplication5.Controllers
 
         // GET: api/Properties/5
         [HttpGet("{id}")]
-        [Authorize(Roles = "o,t")]
+        //[Authorize(Roles = "o")]
         public async Task<ActionResult<Property>> GetProperty(int id)
         {
-            //var property = await _repository._context.Properties.FindAsync(id);
             var property = await _repository.FindAsync(id);
             try
             {
                 if (property == null)
                 {
                     throw new Propertynotfoundexception();
-
                 }
             }
             catch (Exception ex)
@@ -86,9 +84,41 @@ namespace WebApplication5.Controllers
             return property;
         }
 
+        // GET: api/Properties/owner/{ownerId}
+        [HttpGet("owner/{ownerId}")]
+        //[Authorize(Roles = "o,t")]
+        public async Task<ActionResult<IEnumerable<Property>>> GetPropertiesByOwnerId(string ownerId)
+        {
+            var ownerIdParam = new SqlParameter("@OwnerId", ownerId);
+            var properties = await _context.Properties
+                .FromSqlRaw("EXEC GetPropertiesByOwner @OwnerId", ownerIdParam)
+                .ToListAsync();
+
+            if (properties == null || !properties.Any())
+            {
+                return NotFound($"No properties found for owner ID: {ownerId}");
+            }
+
+            foreach (var property in properties)
+            {
+                // Call the stored procedure to get owner details
+                var ownerIdParamDetail = new SqlParameter("@Owner_Id", property.Owner_Id);
+                var ownerNameParam = new SqlParameter("@Owner_Name", System.Data.SqlDbType.NVarChar, 100) { Direction = System.Data.ParameterDirection.Output };
+                var ownerPhoneNumberParam = new SqlParameter("@Owner_PhoneNumber", System.Data.SqlDbType.NVarChar, 15) { Direction = System.Data.ParameterDirection.Output };
+
+                await _context.Database.ExecuteSqlRawAsync("EXEC GetOwnerDetailsByOwnerId @Owner_Id, @Owner_Name OUTPUT, @Owner_PhoneNumber OUTPUT",
+                    ownerIdParamDetail, ownerNameParam, ownerPhoneNumberParam);
+
+                property.Owner_Name = ownerNameParam.Value != DBNull.Value ? (string)ownerNameParam.Value : null;
+                property.Owner_PhoneNumber = ownerPhoneNumberParam.Value != DBNull.Value ? Convert.ToInt64(ownerPhoneNumberParam.Value) : (long?)null;
+            }
+
+            return properties;
+        }
+
         // PUT: api/Properties/5
         [HttpPut("{id}")]
-        [Authorize(Roles = "o")]
+        //[Authorize(Roles = "o")]
         public async Task<IActionResult> PutProperty(int id, Property property)
         {
             if (id != property.Property_Id)
@@ -118,8 +148,8 @@ namespace WebApplication5.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "o")]
-        public async Task<ActionResult<Property>> PostProperty(string address, string description, string owner_Id, bool availableStatus, string owner_Signature,decimal Price)
+        //[Authorize(Roles = "o")]
+        public async Task<ActionResult<Property>> PostProperty([FromForm] string address, [FromForm] string description, [FromForm] string owner_Id, [FromForm] bool availableStatus, [FromForm] string owner_Signature, [FromForm] decimal Price, [FromForm] string image)
         {
             var property = new Property
             {
@@ -128,7 +158,8 @@ namespace WebApplication5.Controllers
                 Owner_Id = owner_Id,
                 AvailableStatus = availableStatus,
                 Owner_Signature = owner_Signature,
-                PriceOfTheProperty=Price
+                PriceOfTheProperty = Price,
+                Image=image
             };
 
             var tenant = _registrationRepository.readData().FirstOrDefault(i => i.ID == owner_Id);
@@ -151,7 +182,7 @@ namespace WebApplication5.Controllers
 
         // DELETE: api/Properties/5
         [HttpDelete("{id}")]
-        [Authorize(Roles = "o")]
+        //[Authorize(Roles = "o")]
         public async Task<IActionResult> DeleteProperty(int id)
         {
             var property = await _repository.FindAsync(id);
@@ -165,7 +196,5 @@ namespace WebApplication5.Controllers
 
             return NoContent();
         }
-
-       
     }
 }

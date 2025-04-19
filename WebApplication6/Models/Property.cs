@@ -32,5 +32,8 @@ namespace WebApplication6.Models
 
         [NotMapped]
         public string Owner_Signature { get; set; }
+
+        public string Image { get; set; }
+
     }
 }

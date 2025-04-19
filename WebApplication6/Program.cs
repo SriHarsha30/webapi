@@ -13,6 +13,19 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MyCorsPolicy", builder => builder
+        .WithOrigins("http://localhost:3000", "http://localhost:3002", "http://localhost:3001", "http://localhost:3003", "http://localhost:3004", "http://localhost:3005", "http://localhost:3006") // Frontend origin
+        .AllowAnyMethod() // Allow all HTTP methods
+        .AllowCredentials() // Allow credentials (cookies)
+        .WithHeaders("Accept", "Content-Type", "Origin", "X-My-Header", "Authorization") // Include Authorization header
+    );
+});
+
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "OR_APIServer2", Version = "v1" });

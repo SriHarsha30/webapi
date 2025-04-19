@@ -28,7 +28,7 @@ namespace WebApplication6.Controllers
                 return Unauthorized("Invalid username or password");
             }
 
-            return Ok(new { token });
+            return Ok(new {Token= token });
         }
     }
 }
