@@ -361,3 +361,21 @@ BEGIN
     END
 END;
 -----------------------------------------------------------------------------------------------------
+CREATE PROCEDURE sp_GetallMaintainancesByOwnerId
+ 
+@OwnerId VARCHAR(50)
+ 
+AS
+ 
+BEGIN
+ 
+    SELECT m.RequestId,m.PropertyId, m.TenantId, m.Description, m.Status,m.ImagePath
+ 
+    FROM Maintainances m
+ 
+    INNER JOIN Properties p ON m.PropertyId = p.Property_Id
+ 
+    WHERE p.Owner_Id = @OwnerId;
+ 
+END
+-----------------------------------------------------------------------------------------------
